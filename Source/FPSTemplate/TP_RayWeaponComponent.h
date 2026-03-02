@@ -20,12 +20,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float WeaponRange = 10000.f;
 	
+	UPROPERTY(EditAnywhere,Category = Weapon,meta = (ClampMin = "1"))
+	int RayBounceAmount = 1.f;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly,Category = "Asset Refrences")
 	UNiagaraSystem* BeamParticles;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Refrences")
 	UNiagaraSystem* HitParticles;
-	
 	
 	virtual void Fire() override;
 };
