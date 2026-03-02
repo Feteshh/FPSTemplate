@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "TP_WeaponComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "TP_RayWeaponComponent.generated.h"
 
 /**
@@ -17,6 +19,13 @@ class FPSTEMPLATE_API UTP_RayWeaponComponent : public UTP_WeaponComponent
 public:
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float WeaponRange = 10000.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly,Category = "Asset Refrences")
+	UNiagaraSystem* BeamParticles;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Refrences")
+	UNiagaraSystem* HitParticles;
+	
 	
 	virtual void Fire() override;
 };

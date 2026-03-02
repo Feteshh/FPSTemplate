@@ -3,6 +3,7 @@
 
 #include "TP_RayWeaponComponent.h"
 #include "FPSTemplateCharacter.h"
+#include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 
 void UTP_RayWeaponComponent::Fire()
 {
@@ -22,12 +23,26 @@ void UTP_RayWeaponComponent::Fire()
 			const FVector End = Start + (Forward * WeaponRange);
 			
 			bool isHit = World->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility);
-			DrawDebugLine(GetWorld(),Start,End,FColor::Yellow,false,1,0,1);
+			FVector BeamEnd = End;
 			
+			if (BeamParticles != nullptr)
+				{
+				UNiagaraComponent* effect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),BeamParticles,Start);
+				if (effect != nullptr)
+					{
+					effect->SetVariableVec3(TEXT("EndPoint"),BeamEnd);
+					}
+				}
+            				
 			if (isHit)
 			{
+				
 				if (OutHit.bBlockingHit)
 				{
+					if (HitParticles != nullptr)
+					{
+						UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),HitParticles,OutHit.ImpactPoint, OutHit.ImpactNormal.Rotation());
+					}
 					AActor* OtherActor = OutHit.GetActor();
 					UPrimitiveComponent* OtherComponent = OutHit.GetComponent();
 					
@@ -36,6 +51,7 @@ void UTP_RayWeaponComponent::Fire()
 						OtherComponent != nullptr &&
 						OtherComponent->IsSimulatingPhysics())
 					{
+						BeamEnd = OutHit.ImpactPoint;
 						OtherComponent->AddImpulseAtLocation(Forward * 300000.f,OutHit.ImpactPoint);
 					}
 				}
