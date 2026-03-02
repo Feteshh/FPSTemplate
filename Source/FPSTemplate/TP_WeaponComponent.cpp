@@ -43,6 +43,12 @@ void UTP_WeaponComponent::Fire()
 		{
 			AnimInstance->Montage_Play(FireAnimation, 1.f);
 		}
+		
+	}
+	// FireRate
+	if (CanFire)
+	{
+		CanFire = false;
 	}
 }
 
@@ -97,3 +103,13 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	// maintain the EndPlay call chain
 	Super::EndPlay(EndPlayReason);
 }
+
+void UTP_WeaponComponent::TickComponent(float deltaTime, ELevelTick tickType,
+	FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(deltaTime, tickType, ThisTickFunction);
+	
+	
+	
+}
+

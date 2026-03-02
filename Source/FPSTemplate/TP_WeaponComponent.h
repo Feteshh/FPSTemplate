@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TaskSyncManager.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/ActorComponent.h"
 #include "TP_WeaponComponent.generated.h"
 
 class AFPSTemplateCharacter;
@@ -15,6 +17,13 @@ class FPSTEMPLATE_API UTP_WeaponComponent : public USkeletalMeshComponent
 
 public:
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = Weapon, meta = (ClampMin = "0.05"))
+	float FireRate;
+	
+	bool CanFire;
+	float FireRateTimer;
+	
+public:
 	/** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	USoundBase* FireSound;
@@ -55,4 +64,7 @@ protected:
 protected:
 	/** The Character holding this weapon*/
 	AFPSTemplateCharacter* Character;
+	
+private:
+	virtual void TickComponent(float deltaTime, ELevelTick tickType, FActorComponentTickFunction* ThisTickFunction);
 };
