@@ -31,7 +31,7 @@ void UTP_RayWeaponComponent::Fire()
 			
 			while (currentRayBounce < RayBounceAmount)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, std::to_string(currentRayBounce).c_str());
+				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, std::to_string(currentRayBounce).c_str());
 
 				bool isHit = World->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility);
 				FVector BeamEnd = End;

@@ -18,6 +18,7 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 {
 	// Default offset from the character location for projectiles to spawn
 	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
+	FireSoundVolume = 0.6;
 }
 
 
@@ -31,7 +32,7 @@ void UTP_WeaponComponent::Fire()
 	// Try and play the sound if specified
 	if (FireSound != nullptr)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation(),FireSoundVolume);
 	}
 	
 	// Try and play a firing animation if specified
