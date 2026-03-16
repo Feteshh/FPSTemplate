@@ -4,6 +4,7 @@
 #include "Item.h"
 
 #include "Components/TextBlock.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
@@ -31,25 +32,26 @@ void AItem::BeginPlay()
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 	UWorld* world = GetWorld();
 	if (world)
 	{
-		AController* controller = world->GetFirstPlayerController();
-		if (controller)
+		APlayerCameraManager* CameraManager = 
+			UGameplayStatics::GetPlayerCameraManager(world, 0);
+		if (CameraManager)
 		{
-			AActor* playerPawn = controller->GetPawn();
+		FVector cameraLoc = CameraManager->GetCameraLocation();
 			
-			if (playerPawn)
-			{
 				FRotator lookAt = UKismetMathLibrary::FindLookAtRotation(
 					GetActorLocation(),
-					playerPawn->GetActorLocation());
+					cameraLoc);
 				Text->SetWorldRotation(lookAt);
-			}
 		}
+		
 	}
-
 }
+
+
 
 void AItem::UpdateTitle()
 {

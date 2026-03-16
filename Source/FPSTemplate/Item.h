@@ -19,7 +19,7 @@ enum class ERarity: uint8
 };
 
 USTRUCT(BlueprintType)
-struct FItemData
+struct FItemData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 	
