@@ -3,9 +3,9 @@
 
 #include "Item.h"
 
-#include "Components/TextBlock.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "ItemTextDisplay.h"
+
+
 
 // Sets default values
 AItem::AItem()
@@ -14,18 +14,19 @@ AItem::AItem()
 	PrimaryActorTick.bCanEverTick = true;
 	Model = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item Model"));
 	RootComponent = Model;
-	Text = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Item Title"));
-	Text->SetupAttachment(Model);
+	
 	Collider = CreateDefaultSubobject<UBoxComponent>(TEXT("Item Collider"));
 	Collider->SetupAttachment(Model);
+	
+	ItemTextDisplay = CreateDefaultSubobject<UItemTextDisplay>(TEXT("Item Text Display"));
+	ItemTextDisplay->SetupAttachment(Model);	
 }
 
 // Called when the game starts or when spawned
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
-	UpdateTitle();
-	
+	//ItemTextDisplay->UpdateTitle(itemDetail.ItemName,RarityColor[itemDetail.Rarity]);
 }
 
 // Called every frame
@@ -33,33 +34,19 @@ void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	UWorld* world = GetWorld();
-	if (world)
-	{
-		APlayerCameraManager* CameraManager = 
-			UGameplayStatics::GetPlayerCameraManager(world, 0);
-		if (CameraManager)
-		{
-		FVector cameraLoc = CameraManager->GetCameraLocation();
-			
-				FRotator lookAt = UKismetMathLibrary::FindLookAtRotation(
-					GetActorLocation(),
-					cameraLoc);
-				Text->SetWorldRotation(lookAt);
-		}
-		
-	}
 }
 
 
 
-void AItem::UpdateTitle()
-{
-	if (Text)
-	{
-		Text->SetText(FText::FromString(itemDetail.ItemName));
-		Text->SetTextRenderColor(RarityColor[itemDetail.Rarity]);
-	}
-}
+// void AItem::UpdateTitle()
+// {
+// 	
+// 	
+// 	if (Text)
+// 	{
+// 		Text->SetText(FText::FromString(itemDetail.ItemName));
+// 		Text->SetTextRenderColor(RarityColor[itemDetail.Rarity]);
+// 	}
+// }
 
 

@@ -3,6 +3,8 @@
 
 #include "SpecificItemSpawner.h"
 
+#include "ItemTextDisplay.h"
+
 // Sets default values
 ASpecificItemSpawner::ASpecificItemSpawner()
 {
@@ -30,7 +32,8 @@ void ASpecificItemSpawner::BeginPlay()
 		if (newItem)
 		{
 			newItem->itemDetail = newItemData;
-			newItem->UpdateTitle();
+			if (newItem->ItemTextDisplay)
+				newItem->ItemTextDisplay->UpdateTitle(newItem->itemDetail.ItemName,newItem->RarityColor[newItemData.Rarity]);
 		}
 	}
 }

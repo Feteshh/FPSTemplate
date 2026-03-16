@@ -5,8 +5,9 @@
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
-#include "Components/TextRenderComponent.h"
 #include "Item.generated.h"
+
+class UItemTextDisplay;
 
 UENUM(BlueprintType)
 enum class ERarity: uint8
@@ -49,7 +50,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void UpdateTitle();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FItemData itemDetail;
@@ -61,7 +61,8 @@ public:
 	UStaticMeshComponent* Model;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTextRenderComponent* Text;
+	UItemTextDisplay* ItemTextDisplay;
+	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* Collider;
