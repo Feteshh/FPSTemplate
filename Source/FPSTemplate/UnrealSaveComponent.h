@@ -3,19 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Item.h"
 #include "Components/ActorComponent.h"
-#include "JsonSaving.generated.h"
+#include "UnrealSaveComponent.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class FPSTEMPLATE_API UJsonSaving : public UActorComponent
+class FPSTEMPLATE_API UUnrealSaveComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UJsonSaving();
+	UUnrealSaveComponent();
 
 protected:
 	// Called when the game starts
@@ -24,8 +23,10 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
-	
-	FString ItemDataToJSON(FItemData itemToConvert);
-	FItemData JSOnToItemData(FString stringToConvert);
+
+		
+	UFUNCTION(blueprintCallable, Category = "Saving")
+	void Save();
+	UFUNCTION(BlueprintCallable, Category = "Saving")
+	void Load();
 };
