@@ -3,7 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Item.h"
 #include "Components/ActorComponent.h"
+
+
 #include "StringSaver.generated.h"
 
 
@@ -39,5 +42,6 @@ public:
 	bool FileSave(FString SaveTextB, FString FileNameB);
 	bool FileLoad(FString FileNameA, FString & SaveTextA);
 	
-		
+	FString ItemDataToJSON(FItemData itemToConvert);
+	FItemData JSOnToItemData(FString stringToConvert);
 };

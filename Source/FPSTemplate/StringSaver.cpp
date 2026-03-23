@@ -3,6 +3,7 @@
 
 #include "StringSaver.h"
 
+#include "JsonObjectConverter.h"
 #include "MediaShaders.h"
 
 // Sets default values for this component's properties
@@ -21,6 +22,13 @@ void UStringSaver::BeginPlay()
 {
 	Super::BeginPlay();
 
+	pathName = FPaths::ProjectSavedDir();
+	saveLocation = pathName + folderName + fileName;
+	
+	Save();
+	
+	IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
+	
 	// ...
 	
 }
@@ -42,6 +50,21 @@ bool UStringSaver::FileSave(FString SaveTextB, FString FileNameB)
 bool UStringSaver::FileLoad(FString FileNameA, FString& SaveTextA)
 {
 	return FFileHelper::LoadFileToString(SaveTextA, *(FileNameA));
+}
+
+FString UStringSaver::ItemDataToJSON(FItemData itemToConvert)
+{
+	FString jsonString;
+	FJsonObjectConverter::UStructToJsonObjectString(itemToConvert, jsonString, 0,0);
+	return jsonString;
+}
+
+FItemData UStringSaver::JSOnToItemData(FString stringToConvert)
+{
+	FItemData RestoredItemData;
+	FJsonObjectConverter::JsonObjectStringToUStruct(stringToConvert, &RestoredItemData,0,0);
+	FJsonObjectConverter::JsonObjectStringToUStruct(stringToConvert, &RestoredItemData,0,0);
+	return RestoredItemData;
 }
 
 bool UStringSaver::Save()
@@ -66,3 +89,4 @@ bool UStringSaver::Load()
 	}
 	return false;
 }
+
