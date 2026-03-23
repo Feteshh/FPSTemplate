@@ -3,6 +3,7 @@
 
 #include "Item.h"
 
+#include "FaceCameraTextRenderComponent.h"
 #include "ItemTextDisplay.h"
 
 
@@ -18,7 +19,7 @@ AItem::AItem()
 	Collider = CreateDefaultSubobject<UBoxComponent>(TEXT("Item Collider"));
 	Collider->SetupAttachment(Model);
 	
-	ItemTextDisplay = CreateDefaultSubobject<UItemTextDisplay>(TEXT("Item Text Display"));
+	ItemTextDisplay = CreateDefaultSubobject<UFaceCameraTextRenderComponent>(TEXT("Item Text Display"));
 	ItemTextDisplay->SetupAttachment(Model);	
 }
 

@@ -3,6 +3,7 @@
 
 #include "ItemSpawner.h"
 
+#include "FaceCameraTextRenderComponent.h"
 #include "ItemTextDisplay.h"
 
 // Sets default values

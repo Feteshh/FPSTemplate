@@ -52,11 +52,15 @@ void UItemTextDisplay::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 			Text->SetWorldRotation(lookAt);
 		}
 		
+		
+		
+		
 	}
 }
 
 void UItemTextDisplay::UpdateTitle(FString ItemName, FColor TextColor)
 {
+	
 	if (Text)
 	{
 		Text->SetText(FText::FromString(ItemName));

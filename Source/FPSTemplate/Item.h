@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+class UFaceCameraTextRenderComponent;
 class UItemTextDisplay;
 
 UENUM(BlueprintType)
@@ -61,7 +62,7 @@ public:
 	UStaticMeshComponent* Model;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UItemTextDisplay* ItemTextDisplay;
+	UFaceCameraTextRenderComponent* ItemTextDisplay;
 	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
