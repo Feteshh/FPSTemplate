@@ -23,9 +23,14 @@ void UUnrealSaveComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	Load();
-	// ...
-	
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("TestSaveSlot"),0))
+	{
+		Load();
+	}
+	else
+	{
+		Save();
+	}
 }
 
 
@@ -50,6 +55,7 @@ void UUnrealSaveComponent::Save()
 
 void UUnrealSaveComponent::Load()
 {
+	
 	UMySaveGame* myLoadGameInstance;
 	myLoadGameInstance = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
 	myLoadGameInstance = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("TestSaveSlot"),0));
