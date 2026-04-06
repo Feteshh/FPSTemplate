@@ -51,19 +51,15 @@ void UItemTextDisplay::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 				cameraLoc);
 			Text->SetWorldRotation(lookAt);
 		}
-		
-		
-		
-		
 	}
 }
 
 void UItemTextDisplay::UpdateTitle(FString ItemName, FColor TextColor)
 {
+	if (!Text)
+		return;
 	
-	if (Text)
-	{
-		Text->SetText(FText::FromString(ItemName));
-		Text->SetTextRenderColor(TextColor);
-	}
+	Text->SetText(FText::FromString(ItemName));
+	Text->SetTextRenderColor(TextColor);
+		
 }

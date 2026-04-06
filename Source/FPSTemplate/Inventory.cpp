@@ -11,6 +11,8 @@ UInventory::UInventory()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	InventorySlots.SetNum(10);
+	
 	// ...
 }
 
@@ -25,6 +27,7 @@ void UInventory::BeginPlay()
 }
 
 
+
 // Called every frame
 void UInventory::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -33,23 +36,87 @@ void UInventory::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	// ...
 }
 
-void UInventory::TryPickupItem(FItemData ItemToAdd)
+bool UInventory::AddItem(FDataTableRowHandle ItemRow)
 {
-	if (MaxItemCount > MyItems.Num())
+	if (!ItemRow.DataTable)
+		return false;
+	
+	for (FInventorySlot& Slot : InventorySlots)
 	{
-		PickupItem(ItemToAdd);
+		if (Slot.ItemRow == ItemRow)
+		{
+			Slot.Quantity++;
+			return true;
+		}
+	}
+	
+	for (FInventorySlot& Slot : InventorySlots)
+	{
+		if (Slot.Quantity == 0)
+		{
+			Slot.ItemRow = ItemRow;
+			Slot.Quantity = 1;
+			
+			return true;
+		}
+	}
+	return false;
+}
+
+void UInventory::SelectSlot(int NewIndex)
+{
+	if (NewIndex < 0)
+	{
+		SelectedSlotIndex = InventorySlots.Num() - 1;
+		return;
+	}
+	else if (NewIndex >= InventorySlots.Num())
+	{
+		SelectedSlotIndex = 0;
 	}
 	else 
-		UE_LOG(LogTemp, Warning, TEXT("Inventory Full"));
+		SelectedSlotIndex = FMath::Clamp(NewIndex, 0, InventorySlots.Num() - 1);
 }
 
-void UInventory::PickupItem(FItemData ItemToAdd)
+void UInventory::EquipSelectedItem()
 {
-	UE_LOG(LogTemp, Log, TEXT("item picked up"));
+	if (EquippedActor) // Destroys current equipped item
+	{
+		EquippedActor->Destroy();
+		EquippedActor = nullptr;
+	}
+	
+	if (!InventorySlots.IsValidIndex(SelectedSlotIndex))
+		return;
+	
+	FInventorySlot& Slot = InventorySlots[SelectedSlotIndex];
+	
+	if (Slot.Quantity <= 0)
+		return;
+	
+	FItemData* ItemData = Slot.ItemRow.GetRow<FItemData>("EquipSelectedItem");
+	
+	if (!ItemData)
+		return;
+	
+	if (!ItemData->EquipActorClass)
+		return;
+	
+	AActor* OwnerActor = GetOwner();
+	
+	if (!OwnerActor)
+		return;
+	
+	EquippedActor = GetWorld()->SpawnActor<AActor>(ItemData->EquipActorClass);
+	
+	if (!EquippedActor) 
+		return;
+	
+	EquippedActor->AttachToActor(OwnerActor,FAttachmentTransformRules::SnapToTargetIncludingScale);
 }
 
-void UInventory::DropItem()
-{
-	UE_LOG(LogTemp, Log, TEXT("item picked dropped"));
-}
+
+
+
+
 

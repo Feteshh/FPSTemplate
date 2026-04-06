@@ -19,15 +19,14 @@ void AItemSpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	FItemData NewItemData;
 	
-	TArray<FItemData*> ItemList;
+	TArray<FName> RowNames = ItemTable->GetRowNames();
 	
-	ItemTable->GetAllRows("", ItemList);
-	
-	for (int i = 0; i < ItemList.Num(); i++)
+	for (int i = 0; i < RowNames.Num(); i++)
 	{
-		NewItemData = *ItemList[i];
+		FDataTableRowHandle RowHandle;
+		RowHandle.DataTable = ItemTable;
+		RowHandle.RowName = RowNames[i];
 		
 		FVector spawnLocation = GetActorLocation() + FVector(50 * i ,0,0);
 		FRotator spawnRotation = GetActorRotation();
@@ -36,10 +35,7 @@ void AItemSpawner::BeginPlay()
 		
 		if (newItem)
 		{
-			
-			newItem->itemDetail = NewItemData;
-			if (newItem->ItemTextDisplay)
-			newItem->ItemTextDisplay->UpdateTitle(NewItemData.ItemName ,newItem->RarityColor[NewItemData.Rarity]);
+			newItem->InitializeItem(RowHandle);
 		}
 	}
 	

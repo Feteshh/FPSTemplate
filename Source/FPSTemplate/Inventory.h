@@ -7,6 +7,21 @@
 #include "Inventory.generated.h"
 
 
+USTRUCT(BlueprintType)
+struct FInventorySlot
+{
+	GENERATED_BODY()
+	
+public :
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FDataTableRowHandle ItemRow;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Quantity = 0;
+	
+};
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FPSTEMPLATE_API UInventory : public UActorComponent
 {
@@ -23,17 +38,22 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<FItemData> MyItems;
 	
-	int MaxItemCount = 5;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FInventorySlot> InventorySlots;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int SelectedSlotIndex = 0;
+	
+	UPROPERTY()
+	AActor* EquippedActor;
 	
 	UFUNCTION(BlueprintCallable)
-	void TryPickupItem(FItemData ItemToAdd);
-	
-	void PickupItem(FItemData ItemToAdd);
+	bool AddItem(FDataTableRowHandle ItemRow);
 	
 	UFUNCTION(BlueprintCallable)
-	void DropItem();
+	void SelectSlot(int NewIndex);
+	
+	void EquipSelectedItem();
+	
 };

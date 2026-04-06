@@ -20,6 +20,16 @@ enum class ERarity: uint8
 	Legendary UMETA(DisplayName = "Legendary")
 };
 
+UENUM(BlueprintType)
+enum class EItemType: uint8
+{
+	Gun UMETA(DisplayName = "Weapon"),
+	Key UMETA(DisplayName = "Key"),
+	Consumable UMETA(DisplayName = "Consumable"),
+	Standard UMETA(DisplayName = "Standard")
+};
+
+
 USTRUCT(BlueprintType)
 struct FItemData : public FTableRowBase
 {
@@ -29,6 +39,10 @@ struct FItemData : public FTableRowBase
 	FString ItemName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ERarity Rarity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EItemType ItemType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AActor> EquipActorClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float BaseValue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -52,8 +66,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FItemData itemDetail;
+	UFUNCTION(BlueprintCallable)
+	void InitializeItem(FDataTableRowHandle NewItemRow);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FDataTableRowHandle ItemRow;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TMap<ERarity,FColor> RarityColor;
@@ -67,6 +84,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* Collider;
+	
+	
 	
 	
 };
