@@ -78,6 +78,19 @@ void UInventory::SelectSlot(int NewIndex)
 		SelectedSlotIndex = FMath::Clamp(NewIndex, 0, InventorySlots.Num() - 1);
 }
 
+FString UInventory::GetItemNameFromSlot(const FInventorySlot& Slot)
+{
+	if (!Slot.ItemRow.DataTable)
+		return "Empty";
+	
+	FItemData* ItemData = Slot.ItemRow.GetRow<FItemData>("GetItemName");
+	
+	if (!ItemData)
+		return "Invalid";
+	
+	return ItemData->ItemName;
+}
+
 void UInventory::EquipSelectedItem()
 {
 	if (EquippedActor) // Destroys current equipped item

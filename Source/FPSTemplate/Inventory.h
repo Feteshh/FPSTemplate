@@ -54,6 +54,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SelectSlot(int NewIndex);
 	
+	UFUNCTION(BlueprintCallable)
+	FString GetItemNameFromSlot(const FInventorySlot& Slot);
+	
 	void EquipSelectedItem();
+	
 	
 };
