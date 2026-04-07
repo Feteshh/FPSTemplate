@@ -43,7 +43,7 @@ public:
 	TArray<FInventorySlot> InventorySlots;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int SelectedSlotIndex = 0;
+	int32 SelectedSlotIndex = 0;
 	
 	UPROPERTY()
 	AActor* EquippedActor;

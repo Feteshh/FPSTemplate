@@ -2,9 +2,11 @@
 
 #include "TP_PickUpComponent.h"
 
+#include "Item.h"
+
 UTP_PickUpComponent::UTP_PickUpComponent()
 {
-	// Setup the Sphere Collision
+	// Set up the Sphere Collision
 	SphereRadius = 32.f;
 }
 
@@ -20,12 +22,25 @@ void UTP_PickUpComponent::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCo
 {
 	// Checking if it is a First Person Character overlapping
 	AFPSTemplateCharacter* Character = Cast<AFPSTemplateCharacter>(OtherActor);
-	if(Character != nullptr)
+	if(!Character)
+		return;
+
+
+	UInventory* Inventory = Character->FindComponentByClass<UInventory>();
+
+	if (!Inventory)
+		return;
+	
+	AItem* ItemActor = Cast<AItem>(GetOwner());
+	
+	if (!ItemActor)
+		return;
+	
+
+	if (Inventory->AddItem(ItemActor->ItemRow))
 	{
-		// Notify that the actor is being picked up
 		OnPickUp.Broadcast(Character);
 
-		// Unregister from the Overlap Event so it is no longer triggered
-		OnComponentBeginOverlap.RemoveAll(this);
+		GetOwner()->Destroy();
 	}
 }

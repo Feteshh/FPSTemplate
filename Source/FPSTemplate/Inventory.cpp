@@ -41,12 +41,21 @@ bool UInventory::AddItem(FDataTableRowHandle ItemRow)
 	if (!ItemRow.DataTable)
 		return false;
 	
-	for (FInventorySlot& Slot : InventorySlots)
+	FItemData* ItemData = ItemRow.GetRow<FItemData>("AddItem");
+	
+	if (!ItemData)
+		return false;
+	
+	if (ItemData->bStackable)
 	{
-		if (Slot.ItemRow == ItemRow)
+		for (FInventorySlot& Slot : InventorySlots)
 		{
-			Slot.Quantity++;
-			return true;
+			if (Slot.ItemRow == ItemRow &&
+				Slot.Quantity < ItemData->MaxStackSize)
+			{
+				Slot.Quantity++;
+				return true;
+			}
 		}
 	}
 	

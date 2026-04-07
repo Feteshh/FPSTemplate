@@ -47,6 +47,10 @@ struct FItemData : public FTableRowBase
 	float BaseValue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Weight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bStackable = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MaxStackSize = 1;
 };
 
 UCLASS()
