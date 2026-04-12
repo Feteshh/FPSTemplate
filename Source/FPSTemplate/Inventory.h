@@ -57,7 +57,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FString GetItemNameFromSlot(const FInventorySlot& Slot);
 	
+	UFUNCTION(blueprintCallable)
+	int GetItemQuantity(const FInventorySlot& Slot);
+	
+	UFUNCTION(BlueprintCallable)
 	void EquipSelectedItem();
 	
+	void CheckCurrentSlot(const FInventorySlot& Slot);
 	
 };

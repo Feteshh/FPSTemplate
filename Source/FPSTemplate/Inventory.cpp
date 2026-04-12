@@ -2,7 +2,10 @@
 
 
 #include "Inventory.h"
+
+#include "FPSTemplateCharacter.h"
 #include "Item.h"
+#include "TP_WeaponComponent.h"
 
 // Sets default values for this component's properties
 UInventory::UInventory()
@@ -100,6 +103,19 @@ FString UInventory::GetItemNameFromSlot(const FInventorySlot& Slot)
 	return ItemData->ItemName;
 }
 
+int UInventory::GetItemQuantity(const FInventorySlot& Slot)
+{
+	if (!Slot.ItemRow.DataTable)
+		return 0;
+	
+	FItemData* ItemData = Slot.ItemRow.GetRow<FItemData>("GetItemQuantity");
+	
+	if (!ItemData)
+		return -1;
+	
+	return Slot.Quantity;
+}
+
 void UInventory::EquipSelectedItem()
 {
 	if (EquippedActor) // Destroys current equipped item
@@ -112,12 +128,10 @@ void UInventory::EquipSelectedItem()
 		return;
 	
 	FInventorySlot& Slot = InventorySlots[SelectedSlotIndex];
-	
 	if (Slot.Quantity <= 0)
 		return;
 	
 	FItemData* ItemData = Slot.ItemRow.GetRow<FItemData>("EquipSelectedItem");
-	
 	if (!ItemData)
 		return;
 	
@@ -125,16 +139,34 @@ void UInventory::EquipSelectedItem()
 		return;
 	
 	AActor* OwnerActor = GetOwner();
-	
 	if (!OwnerActor)
 		return;
 	
-	EquippedActor = GetWorld()->SpawnActor<AActor>(ItemData->EquipActorClass);
+	AFPSTemplateCharacter* Character = Cast<AFPSTemplateCharacter>(OwnerActor);
+	if (!Character)
+		return;
 	
+	EquippedActor = GetWorld()->SpawnActor<AActor>(ItemData->EquipActorClass);
 	if (!EquippedActor) 
 		return;
 	
-	EquippedActor->AttachToActor(OwnerActor,FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedActor->AttachToComponent(Character->GetMesh1P(),FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("GripPoint"));
+	
+	if (UTP_WeaponComponent* WeaponComponent = EquippedActor->FindComponentByClass<UTP_WeaponComponent>())
+	{
+		WeaponComponent->AttachWeapon(Character);
+	}
+}
+
+void UInventory::CheckCurrentSlot(const FInventorySlot& Slot)
+{
+	if (InventorySlots.IsValidIndex(SelectedSlotIndex))
+	{
+		if (&InventorySlots[SelectedSlotIndex] == &Slot)
+		{
+			SelectSlot(SelectedSlotIndex);
+		}
+	}
 }
 
 

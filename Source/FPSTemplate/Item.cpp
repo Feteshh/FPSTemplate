@@ -30,6 +30,8 @@ AItem::AItem()
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	InitializeItem(ItemRow);
 }
 
 // Called every frame

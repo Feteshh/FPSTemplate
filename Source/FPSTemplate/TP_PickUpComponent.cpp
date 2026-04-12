@@ -24,23 +24,24 @@ void UTP_PickUpComponent::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCo
 	AFPSTemplateCharacter* Character = Cast<AFPSTemplateCharacter>(OtherActor);
 	if(!Character)
 		return;
-
-
+	
 	UInventory* Inventory = Character->FindComponentByClass<UInventory>();
-
 	if (!Inventory)
 		return;
 	
 	AItem* ItemActor = Cast<AItem>(GetOwner());
-	
 	if (!ItemActor)
 		return;
 	
-
+	const FItemData* ItemData = ItemActor->ItemRow.GetRow<FItemData>("Pickup");
+	if (!ItemData)
+		return;
+	
 	if (Inventory->AddItem(ItemActor->ItemRow))
 	{
-		OnPickUp.Broadcast(Character);
-
-		GetOwner()->Destroy();
+		Inventory->EquipSelectedItem();
 	}
+	
+		GetOwner()->Destroy();
+
 }
