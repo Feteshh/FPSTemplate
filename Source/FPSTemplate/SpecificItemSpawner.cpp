@@ -3,6 +3,7 @@
 
 #include "SpecificItemSpawner.h"
 
+#include "FaceCameraTextRenderComponent.h"
 #include "ItemTextDisplay.h"
 
 // Sets default values
@@ -22,8 +23,6 @@ void ASpecificItemSpawner::BeginPlay()
 	
 	if (specificItem.DataTable)
 	{
-		newItemData = *specificItem.GetRow<FItemData>("");
-		
 		FVector SpawnLocation = GetActorLocation();
 		FRotator SpawnRotation = GetActorRotation();
 		
@@ -31,9 +30,15 @@ void ASpecificItemSpawner::BeginPlay()
 		
 		if (newItem)
 		{
-			newItem->itemDetail = newItemData;
+			newItem->ItemRow = specificItem;
 			if (newItem->ItemTextDisplay)
-				newItem->ItemTextDisplay->UpdateTitle(newItem->itemDetail.ItemName,newItem->RarityColor[newItemData.Rarity]);
+			{
+				if (FItemData* ItemData = specificItem.GetRow<FItemData>("Spawner Init"))
+				{
+					newItem->ItemTextDisplay->UpdateTitle(ItemData->ItemName,newItem->RarityColor[ItemData->Rarity]);
+			
+				}
+			}
 		}
 	}
 }

@@ -2,7 +2,10 @@
 
 
 #include "Inventory.h"
+
+#include "FPSTemplateCharacter.h"
 #include "Item.h"
+#include "TP_WeaponComponent.h"
 
 // Sets default values for this component's properties
 UInventory::UInventory()
@@ -11,6 +14,8 @@ UInventory::UInventory()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	InventorySlots.SetNum(10);
+	
 	// ...
 }
 
@@ -25,6 +30,7 @@ void UInventory::BeginPlay()
 }
 
 
+
 // Called every frame
 void UInventory::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -33,23 +39,138 @@ void UInventory::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	// ...
 }
 
-void UInventory::TryPickupItem(FItemData ItemToAdd)
+bool UInventory::AddItem(FDataTableRowHandle ItemRow)
 {
-	if (MaxItemCount > MyItems.Num())
+	if (!ItemRow.DataTable)
+		return false;
+	
+	FItemData* ItemData = ItemRow.GetRow<FItemData>("AddItem");
+	
+	if (!ItemData)
+		return false;
+	
+	if (ItemData->bStackable)
 	{
-		PickupItem(ItemToAdd);
+		for (FInventorySlot& Slot : InventorySlots)
+		{
+			if (Slot.ItemRow == ItemRow &&
+				Slot.Quantity < ItemData->MaxStackSize)
+			{
+				Slot.Quantity++;
+				return true;
+			}
+		}
+	}
+	
+	for (FInventorySlot& Slot : InventorySlots)
+	{
+		if (Slot.Quantity == 0)
+		{
+			Slot.ItemRow = ItemRow;
+			Slot.Quantity = 1;
+			
+			return true;
+		}
+	}
+	return false;
+}
+
+void UInventory::SelectSlot(int NewIndex)
+{
+	if (NewIndex < 0)
+	{
+		SelectedSlotIndex = InventorySlots.Num() - 1;
+		return;
+	}
+	else if (NewIndex >= InventorySlots.Num())
+	{
+		SelectedSlotIndex = 0;
 	}
 	else 
-		UE_LOG(LogTemp, Warning, TEXT("Inventory Full"));
+		SelectedSlotIndex = FMath::Clamp(NewIndex, 0, InventorySlots.Num() - 1);
 }
 
-void UInventory::PickupItem(FItemData ItemToAdd)
+FString UInventory::GetItemNameFromSlot(const FInventorySlot& Slot)
 {
-	UE_LOG(LogTemp, Log, TEXT("item picked up"));
+	if (!Slot.ItemRow.DataTable)
+		return "Empty";
+	
+	FItemData* ItemData = Slot.ItemRow.GetRow<FItemData>("GetItemName");
+	
+	if (!ItemData)
+		return "Invalid";
+	
+	return ItemData->ItemName;
 }
 
-void UInventory::DropItem()
+int UInventory::GetItemQuantity(const FInventorySlot& Slot)
 {
-	UE_LOG(LogTemp, Log, TEXT("item picked dropped"));
+	if (!Slot.ItemRow.DataTable)
+		return 0;
+	
+	FItemData* ItemData = Slot.ItemRow.GetRow<FItemData>("GetItemQuantity");
+	
+	if (!ItemData)
+		return -1;
+	
+	return Slot.Quantity;
 }
+
+void UInventory::EquipSelectedItem()
+{
+	if (EquippedActor) // Destroys current equipped item
+	{
+		EquippedActor->Destroy();
+		EquippedActor = nullptr;
+	}
+	
+	if (!InventorySlots.IsValidIndex(SelectedSlotIndex))
+		return;
+	
+	FInventorySlot& Slot = InventorySlots[SelectedSlotIndex];
+	if (Slot.Quantity <= 0)
+		return;
+	
+	FItemData* ItemData = Slot.ItemRow.GetRow<FItemData>("EquipSelectedItem");
+	if (!ItemData)
+		return;
+	
+	if (!ItemData->EquipActorClass)
+		return;
+	
+	AActor* OwnerActor = GetOwner();
+	if (!OwnerActor)
+		return;
+	
+	AFPSTemplateCharacter* Character = Cast<AFPSTemplateCharacter>(OwnerActor);
+	if (!Character)
+		return;
+	
+	EquippedActor = GetWorld()->SpawnActor<AActor>(ItemData->EquipActorClass);
+	if (!EquippedActor) 
+		return;
+	
+	EquippedActor->AttachToComponent(Character->GetMesh1P(),FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("GripPoint"));
+	
+	if (UTP_WeaponComponent* WeaponComponent = EquippedActor->FindComponentByClass<UTP_WeaponComponent>())
+	{
+		WeaponComponent->AttachWeapon(Character);
+	}
+}
+
+void UInventory::CheckCurrentSlot(const FInventorySlot& Slot)
+{
+	if (InventorySlots.IsValidIndex(SelectedSlotIndex))
+	{
+		if (&InventorySlots[SelectedSlotIndex] == &Slot)
+		{
+			SelectSlot(SelectedSlotIndex);
+		}
+	}
+}
+
+
+
+
+
 

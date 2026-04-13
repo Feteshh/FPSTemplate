@@ -21,13 +21,17 @@ AItem::AItem()
 	
 	ItemTextDisplay = CreateDefaultSubobject<UFaceCameraTextRenderComponent>(TEXT("Item Text Display"));
 	ItemTextDisplay->SetupAttachment(Model);	
+	
+	
+	
 }
 
 // Called when the game starts or when spawned
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
-	//ItemTextDisplay->UpdateTitle(itemDetail.ItemName,RarityColor[itemDetail.Rarity]);
+	
+	InitializeItem(ItemRow);
 }
 
 // Called every frame
@@ -37,17 +41,24 @@ void AItem::Tick(float DeltaTime)
 	
 }
 
+void AItem::InitializeItem(FDataTableRowHandle NewItemRow)
+{
+	ItemRow = NewItemRow;
+
+	if (ItemTextDisplay)
+	{
+		if (FItemData* ItemData =
+			ItemRow.GetRow<FItemData>("InitializeItem"))
+		{
+			ItemTextDisplay->UpdateTitle(
+				ItemData->ItemName,
+				RarityColor[ItemData->Rarity]
+			);
+		}
+	}
+}
 
 
-// void AItem::UpdateTitle()
-// {
-// 	
-// 	
-// 	if (Text)
-// 	{
-// 		Text->SetText(FText::FromString(itemDetail.ItemName));
-// 		Text->SetTextRenderColor(RarityColor[itemDetail.Rarity]);
-// 	}
-// }
+
 
 
