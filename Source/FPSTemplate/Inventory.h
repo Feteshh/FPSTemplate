@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Item.h"
 #include "Components/ActorComponent.h"
 #include "Inventory.generated.h"
 
@@ -12,7 +13,6 @@ struct FInventorySlot
 {
 	GENERATED_BODY()
 	
-public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FDataTableRowHandle ItemRow;
 	
@@ -39,6 +39,9 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AItem> BaseItem;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FInventorySlot> InventorySlots;
 	
@@ -64,5 +67,8 @@ public:
 	void EquipSelectedItem();
 	
 	void CheckCurrentSlot(const FInventorySlot& Slot);
+	
+	UFUNCTION(BlueprintCallable)
+	void DropItem();
 	
 };

@@ -4,7 +4,6 @@
 #include "Item.h"
 
 #include "FaceCameraTextRenderComponent.h"
-#include "ItemTextDisplay.h"
 
 
 
@@ -22,10 +21,6 @@ AItem::AItem()
 	ItemTextDisplay = CreateDefaultSubobject<UFaceCameraTextRenderComponent>(TEXT("Item Text Display"));
 	ItemTextDisplay->SetupAttachment(Model);	
 	
-	
-	
-	
-	
 }
 
 // Called when the game starts or when spawned
@@ -33,7 +28,6 @@ void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	InitializeItem(ItemRow);
 }
 
 // Called every frame
@@ -45,6 +39,7 @@ void AItem::Tick(float DeltaTime)
 
 void AItem::InitializeItem(FDataTableRowHandle NewItemRow)
 {
+	
 	ItemRow = NewItemRow;
 
 	if (ItemTextDisplay)

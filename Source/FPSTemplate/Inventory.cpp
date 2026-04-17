@@ -169,6 +169,48 @@ void UInventory::CheckCurrentSlot(const FInventorySlot& Slot)
 	}
 }
 
+void UInventory::DropItem()
+{
+	
+	if (!InventorySlots.IsValidIndex(SelectedSlotIndex))
+		return;
+	
+	FInventorySlot& Slot = InventorySlots[SelectedSlotIndex];
+	if (Slot.Quantity <= 0)
+		return;
+	
+	FItemData* ItemData = Slot.ItemRow.GetRow<FItemData>("DropItem");
+	if (!ItemData)
+		return;
+	
+	AFPSTemplateCharacter* Character = Cast<AFPSTemplateCharacter>(GetOwner());
+	if (!Character)
+		return;
+	
+	FVector Forward = Character->GetActorForwardVector();
+	FVector SpawnLocation = Character->GetActorLocation() + Forward * 200.f + FVector(0,0,25.f);
+	FRotator SpawnRotation = Character->GetActorRotation();
+	
+
+	if (AItem* DroppedItem = GetWorld()->SpawnActor<AItem>(BaseItem, SpawnLocation, SpawnRotation))
+	{
+		DroppedItem->InitializeItem(Slot.ItemRow);
+	}
+	
+	Slot.Quantity--;
+	
+	if (Slot.Quantity <= 0)
+	{
+		Slot.ItemRow = FDataTableRowHandle(); //Slot Clear
+	}
+	
+	if (EquippedActor)
+	{
+		EquippedActor->Destroy();
+		EquippedActor = nullptr;
+	}
+	
+}
 
 
 
