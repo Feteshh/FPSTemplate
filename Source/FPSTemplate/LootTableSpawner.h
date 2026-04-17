@@ -29,19 +29,28 @@ struct FLootTable
 	
 	const FLootEntry* GetRandomEntry() const
 	{
-		float TotalWeight = 0.f;
+		if (Entries.Num() == 0)
+		{
+			UE_LOG(LogTemp, Error, TEXT("No entries found"));
+			return nullptr;
+		}
 		
+		float TotalWeight = 0.f;
 		for (const FLootEntry& Entry : Entries)
 			TotalWeight += Entry.Weight;
 		
-		float Roll = FMath::RandRange(0.f, TotalWeight);
+		float Roll = FMath::FRandRange(0.f, TotalWeight);
 		float Accum = 0.f;
 		
-		for (const FLootEntry& Entry : Entries)
+		for (int i = 0; i < Entries.Num(); ++i)
 		{
+			const FLootEntry& Entry = Entries[i];
 			Accum += Entry.Weight;
-			if (Roll >= Accum)
+			
+			if (Roll <= Accum)
+			{
 				return &Entry;
+			}
 		}
 		return nullptr;
 	}

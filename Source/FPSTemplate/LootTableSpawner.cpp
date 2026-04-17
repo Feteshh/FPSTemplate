@@ -11,5 +11,9 @@ void ALootTableSpawner::BeginPlay()
 	if (!Entry)
 		return;
 	
+	if (!Entry->Item.DataTable || Entry->Item.RowName.IsNone())
+	{
+		return;
+	}
 	SpawnItem(Entry->Item);
 }

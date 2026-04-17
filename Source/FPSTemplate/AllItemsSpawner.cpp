@@ -9,6 +9,8 @@ void AAllItemsSpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (!ItemTable) return;
+	
 	TArray<FName> RowNames = ItemTable->GetRowNames();
 	
 	for (int i = 0; i < RowNames.Num(); i++)
@@ -19,10 +21,8 @@ void AAllItemsSpawner::BeginPlay()
 		
 		FVector SpawnLocation = GetActorLocation()+ FVector(i * 50.f, 0.f, 0.f);
 		FRotator SpawnRotation = GetActorRotation();
-		
-		AItem* NewItem = GetWorld()->SpawnActor<AItem>(BaseItem, SpawnLocation, SpawnRotation);
-		
-		if (NewItem)
+
+		if (AItem* NewItem = GetWorld()->SpawnActor<AItem>(BaseItem, SpawnLocation, SpawnRotation))
 			NewItem->InitializeItem(RowHandle);
 		
 	}
