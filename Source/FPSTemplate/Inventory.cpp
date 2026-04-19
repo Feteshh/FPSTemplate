@@ -69,6 +69,7 @@ bool UInventory::AddItem(FDataTableRowHandle ItemRow)
 			Slot.ItemRow = ItemRow;
 			Slot.Quantity = 1;
 			
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White,FString::Printf(TEXT("+ 1 %s"), *ItemRow.RowName.ToString()));
 			return true;
 		}
 	}
