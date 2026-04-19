@@ -25,14 +25,13 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 
 void UTP_WeaponComponent::Fire()
 {
-	if (!CanFire || Character == nullptr)
-		return;
+	if (!CanFire || !Character) return;
 	
-	// Try and play the sound if specified
+	// Sound
 	if (FireSound)
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation(),FireSoundVolume);
 	
-	// Try and play a firing animation if specified
+	// Animation
 	if (FireAnimation)
 	{
 		if (UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance())
@@ -40,7 +39,6 @@ void UTP_WeaponComponent::Fire()
 	}
 	
 	CanFire = false;
-	
 	GetWorld()->GetTimerManager().SetTimer(FireRateTimer,this,&UTP_WeaponComponent::ResetCanFire,FireRate, false);
 	
 	PerformFire();
@@ -51,6 +49,10 @@ void UTP_WeaponComponent::PerformFire()
 	//Base Class Does Nothing
 }
 
+void UTP_WeaponComponent::ResetCanFire()
+{
+	CanFire = true;
+}
 
 bool UTP_WeaponComponent::AttachWeapon(AFPSTemplateCharacter* TargetCharacter)
 {
@@ -104,16 +106,5 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void UTP_WeaponComponent::TickComponent(float deltaTime, ELevelTick tickType,
-	FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(deltaTime, tickType, ThisTickFunction);
-	
-	
-	
-}
 
-void UTP_WeaponComponent::ResetCanFire()
-{
-	CanFire = true;
-}
+
