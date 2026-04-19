@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "TP_WeaponComponent.h"
 #include "NiagaraComponent.h"
-#include "NiagaraFunctionLibrary.h"
+
 #include "TP_RayWeaponComponent.generated.h"
 
 /**
@@ -29,5 +29,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Refrences")
 	UNiagaraSystem* HitParticles;
 	
-	virtual void Fire() override;
+	virtual void PerformFire() override;
+	
+private:
+	bool TraceBeam(const FVector& Start,const FVector& End, FHitResult& OutHit) const;
+	void SpawnBeamFX(const FVector& Start, const FVector& End, const FHitResult& Hit, bool bHit) const;
+	void SpawnHitFX(const FHitResult& Hit) const;
+	static void ApplyPhysicsImpulse(const FHitResult& Hit, const FVector& Direction);
+	static FVector ComputeBounceDirection(const FVector& IncomingDir, const FHitResult& Hit);
 };

@@ -19,5 +19,5 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category=Projectile)
 	TSubclassOf<class AFPSTemplateProjectile> ProjectileClass;
 
-	virtual void Fire() override;
+	virtual void PerformFire() override;
 };

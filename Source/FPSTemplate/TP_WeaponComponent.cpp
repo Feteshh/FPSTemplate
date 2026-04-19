@@ -19,39 +19,38 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	// Default offset from the character location for projectiles to spawn
 	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
 	FireSoundVolume = 0.6;
+	CanFire = true;
 }
 
 
 void UTP_WeaponComponent::Fire()
 {
-	if (Character == nullptr || Character->GetController() == nullptr)
-	{
-		
-	}
+	if (!CanFire || Character == nullptr)
+		return;
 	
 	// Try and play the sound if specified
-	if (FireSound != nullptr)
-	{
+	if (FireSound)
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation(),FireSoundVolume);
-	}
 	
 	// Try and play a firing animation if specified
-	if (FireAnimation != nullptr)
+	if (FireAnimation)
 	{
-		// Get the animation object for the arms mesh
-		UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-		if (AnimInstance != nullptr)
-		{
+		if (UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance())
 			AnimInstance->Montage_Play(FireAnimation, 1.f);
-		}
-		
 	}
-	// FireRate
-	if (CanFire)
-	{
-		CanFire = false;
-	}
+	
+	CanFire = false;
+	
+	GetWorld()->GetTimerManager().SetTimer(FireRateTimer,this,&UTP_WeaponComponent::ResetCanFire,FireRate, false);
+	
+	PerformFire();
 }
+
+void UTP_WeaponComponent::PerformFire()
+{
+	//Base Class Does Nothing
+}
+
 
 bool UTP_WeaponComponent::AttachWeapon(AFPSTemplateCharacter* TargetCharacter)
 {
@@ -114,3 +113,7 @@ void UTP_WeaponComponent::TickComponent(float deltaTime, ELevelTick tickType,
 	
 }
 
+void UTP_WeaponComponent::ResetCanFire()
+{
+	CanFire = true;
+}

@@ -5,9 +5,8 @@
 #include "FPSTemplateCharacter.h"
 #include "FPSTemplateProjectile.h"
 
-void UTP_ProjectileWeaponComponent::Fire()
+void UTP_ProjectileWeaponComponent::PerformFire()
 {
-	Super::Fire();
 	
 	// Try and fire a projectile
 	if (ProjectileClass != nullptr)

@@ -2,84 +2,78 @@
 
 
 #include "TP_RayWeaponComponent.h"
-
-#include <string>
-
+#include "NiagaraFunctionLibrary.h"
 #include "FPSTemplateCharacter.h"
-#include "NiagaraDataInterfaceArrayFunctionLibrary.h"
-#include "SNegativeActionButton.h"
 
-void UTP_RayWeaponComponent::Fire()
+
+void UTP_RayWeaponComponent::PerformFire()
 {
-	Super::Fire();
-	
-	UWorld* const World = GetWorld();
-	if (World != nullptr)
-	{
-		APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
-		if (PlayerController != nullptr)
-		{
-			int currentRayBounce = 0;
-			
-			FHitResult OutHit;
-			
-			FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-			//MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
-			FVector Start = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
-			FVector Forward = SpawnRotation.Vector();
-			FVector End = Start + (Forward * WeaponRange);
-			
-			while (currentRayBounce < RayBounceAmount)
-			{
-				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, std::to_string(currentRayBounce).c_str());
+	if (!Character) return;
 
-				bool isHit = World->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility);
-				FVector BeamEnd = End;
-			
-				if (BeamParticles != nullptr)
-				{
-					UNiagaraComponent* effect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),BeamParticles,Start,OutHit.ImpactNormal.Rotation());
-					if (effect != nullptr)
-					{
-						effect->SetVariableVec3(TEXT("EndPoint"),BeamEnd);
-					}
-				}
-			
-			
-				if (isHit)
-				{
-					if (OutHit.bBlockingHit)
-					{
-						if (HitParticles != nullptr)
-						{
-							UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),HitParticles,OutHit.ImpactPoint, OutHit.ImpactNormal.Rotation());
-						}
-						AActor* OtherActor = OutHit.GetActor();
-						UPrimitiveComponent* OtherComponent = OutHit.GetComponent();
-					
-					
-						if (OtherActor != nullptr &&
-							OtherActor != GetOwner() &&
-							OtherComponent != nullptr &&
-							OtherComponent->IsSimulatingPhysics())
-						{
-							BeamEnd = OutHit.ImpactPoint;
-							OtherComponent->AddImpulseAtLocation(Forward * 300000.f,OutHit.ImpactPoint);
-						}
-					
-						SpawnRotation = OutHit.ImpactNormal.Rotation();
-						Start = OutHit.ImpactPoint;
-						Forward = SpawnRotation.RotateVector(Forward);
-						End = Start + (Forward * WeaponRange);
-					
-						currentRayBounce++;
-					}
-				}
-				else
-				{
-					currentRayBounce = RayBounceAmount;
-				}
-			}
-		}
+	const APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+	if (!PlayerController) return;
+
+	const UWorld* const World = GetWorld();
+	if (!World) return;
+	
+	FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+	FVector Start = GetOwner()->GetActorLocation() + CameraRotation.RotateVector(MuzzleOffset);
+	FVector Direction = CameraRotation.Vector();
+	
+	for (int i = 0; i < RayBounceAmount; i++)
+	{
+		FHitResult Hit;
+		FVector End = Start + Direction * WeaponRange;
+		
+		bool bHit = TraceBeam(Start, End, Hit);
+		
+		SpawnBeamFX(Start, End, Hit, bHit);
+		
+		if (!bHit || !Hit.bBlockingHit)
+			break;
+		
+		SpawnHitFX(Hit);
+		ApplyPhysicsImpulse(Hit, Direction);
+		
+		Direction = ComputeBounceDirection(Direction, Hit);
+		Start = Hit.ImpactPoint;
 	}
+}
+
+bool UTP_RayWeaponComponent::TraceBeam(const FVector& Start, const FVector& End, FHitResult& OutHit) const
+{
+	return GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility);
+}
+
+void UTP_RayWeaponComponent::SpawnBeamFX(const FVector& Start, const FVector& End, const FHitResult& Hit,
+	bool bHit) const
+{
+	if (!BeamParticles) return;
+	
+	FVector BeamEnd = bHit ? Hit.ImpactPoint : End;
+
+	if (UNiagaraComponent* Beam = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BeamParticles, Start, (End - Start).Rotation()))
+		Beam->SetVariableVec3(TEXT("EndPoint"),BeamEnd);
+}
+
+void UTP_RayWeaponComponent::SpawnHitFX(const FHitResult& Hit) const
+{
+	if (!HitParticles) return;
+	
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),HitParticles,Hit.ImpactPoint,Hit.ImpactNormal.Rotation());
+}
+
+void UTP_RayWeaponComponent::ApplyPhysicsImpulse(const FHitResult& Hit, const FVector& Direction)
+{
+	if (UPrimitiveComponent* Comp = Hit.GetComponent())
+	{
+		if (Comp->IsSimulatingPhysics())
+			Comp->AddImpulseAtLocation(Direction * 300000.f, Hit.ImpactPoint);
+	}
+}
+
+FVector UTP_RayWeaponComponent::ComputeBounceDirection(const FVector& IncomingDir, const FHitResult& Hit)
+{
+	FRotator BounceRotation = Hit.ImpactNormal.Rotation();
+	return BounceRotation.RotateVector(IncomingDir);
 }
