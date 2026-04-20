@@ -81,6 +81,16 @@ bool UEffectComponent::HasEffect(EEffectType Type) const
 	return false;
 }
 
+void UEffectComponent::RemoveAllEffects()
+{
+	ActiveEffects.Empty();
+	
+	if (UMeshComponent* Mesh = GetOwner()->FindComponentByClass<UMeshComponent>())
+	{
+		Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(1,1,1));
+	}
+}
+
 void UEffectComponent::ProcessEffect(FActiveEffect& Effect, float DeltaTime)
 {
 	Effect.TimeRemaining -= DeltaTime;

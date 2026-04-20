@@ -65,6 +65,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool HasEffect(EEffectType Type) const;
 	
+	UFUNCTION(BlueprintCallable)
+	void RemoveAllEffects();
+
 private:
 	void ProcessEffect(FActiveEffect& Effect, float DeltaTime);
 	void ApplyEffectTick(const FActiveEffect& Effect);

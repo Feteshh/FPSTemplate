@@ -11,6 +11,7 @@ UFaceCameraTextRenderComponent::UFaceCameraTextRenderComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
+
 void UFaceCameraTextRenderComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                                    FActorComponentTickFunction* ThisTickFunction)
 {
