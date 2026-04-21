@@ -1,6 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "FPSTemplateProjectile.h"
+
+#include "DamageableInterface.h"
+#include "EffectComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 
@@ -33,11 +36,33 @@ AFPSTemplateProjectile::AFPSTemplateProjectile()
 
 void AFPSTemplateProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	// Only add impulse and destroy projectile if we hit a physics
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
+	if (!OtherActor) return;
+	
+	if (OtherActor->Implements<UDamageableInterface>())
 	{
-		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-
-		Destroy();
+		IDamageableInterface::Execute_ApplyDamage(OtherActor, Damage);
 	}
+	
+	if (UEffectComponent* EffectComp = OtherActor->FindComponentByClass<UEffectComponent>())
+	{
+		for (const FWeaponEffect& Effect : Effects)
+		{
+			EffectComp->ApplyEffect(
+				Effect.Type,
+				Effect.Magnitude,
+				Effect.Duration,
+				Effect.TickInterval,
+				Effect.bStacks
+				);
+		}
+	}
+	Destroy();
+	
+	// // Only add impulse and destroy projectile if we hit a physics
+	// if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
+	// {
+	// 	OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
+	//
+	// 	Destroy();
+	// }
 }

@@ -9,6 +9,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "TP_WeaponComponent.h"
 #include "Engine/LocalPlayer.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -67,11 +68,18 @@ void AFPSTemplateCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFPSTemplateCharacter::Look);
+		
+		
+		if (CurrentWeapon && CurrentWeapon->FireAction)
+		{
+		UE_LOG(LogTemp, Warning, TEXT("Bound"));
+			EnhancedInputComponent->BindAction(CurrentWeapon->FireAction,ETriggerEvent::Triggered, CurrentWeapon, &UTP_WeaponComponent::Fire);
+			EnhancedInputComponent->BindAction(CurrentWeapon->FireAction,ETriggerEvent::Started, CurrentWeapon, &UTP_WeaponComponent::StartFiring);
+			EnhancedInputComponent->BindAction(CurrentWeapon->FireAction,ETriggerEvent::Completed, CurrentWeapon, &UTP_WeaponComponent::StopFiring);
+		}
+		
 	}
-	else
-	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
-	}
+	
 }
 
 

@@ -2,51 +2,111 @@
 
 
 #include "TP_WeaponComponent.h"
+
+#include "EnhancedInputComponent.h"
 #include "FPSTemplateCharacter.h"
-#include "FPSTemplateProjectile.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
-#include "Kismet/GameplayStatics.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
+#include "FireMode.h"
+#include "ShootingMethod.h"
 #include "Animation/AnimInstance.h"
 #include "Engine/LocalPlayer.h"
-#include "Engine/World.h"
 
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
 {
 	// Default offset from the character location for projectiles to spawn
-	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
 	FireSoundVolume = 0.6;
-	CanFire = true;
 }
 
+void UTP_WeaponComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	if (ShootingMethod)
+		ShootingMethod->Initialize(this);
+	
+	if (FireMode)
+		FireMode->Initialize(this);
+}
+
+void UTP_WeaponComponent::AttachWeapon(AFPSTemplateCharacter* TargetCharacter)
+{
+	Character = TargetCharacter;
+
+	if (!Character)
+	{
+		return;
+	}
+
+	APlayerController* PC = Cast<APlayerController>(Character->GetController());
+	if (!PC)
+	{
+		return;
+	}
+
+	UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PC->InputComponent);
+	if (!EIC)
+	{
+		return;
+	}
+
+	if (!FireAction)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AttachWeapon: FireAction is NULL"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("AttachWeapon: Binding FireAction to %s"), *GetName());
+
+	EIC->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
+	EIC->BindAction(FireAction, ETriggerEvent::Started, this, &UTP_WeaponComponent::StartFiring);
+	EIC->BindAction(FireAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::StopFiring);
+}
+
+
+void UTP_WeaponComponent::ComputeFireStartAndDirection(FVector& OutStart, FVector& OutDirection)
+{
+	if (!Character) return;
+	
+	APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+	if (!PlayerController) return;
+	
+	FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+	OutDirection = CameraRotation.Vector();
+	OutStart = Character->GetActorLocation() + CameraRotation.RotateVector(MuzzleOffset);
+}
 
 void UTP_WeaponComponent::Fire()
 {
-	if (!CanFire || !Character) return;
 	
-	// Sound
-	if (FireSound)
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation(),FireSoundVolume);
+	if (!FireMode)
+		return;
 	
-	// Animation
-	if (FireAnimation)
-	{
-		if (UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance())
-			AnimInstance->Montage_Play(FireAnimation, 1.f);
-	}
-	
-	CanFire = false;
-	GetWorld()->GetTimerManager().SetTimer(FireRateTimer,this,&UTP_WeaponComponent::ResetCanFire,FireRate, false);
-	
-	PerformFire();
+	TryFire();
 }
 
-void UTP_WeaponComponent::PerformFire()
+void UTP_WeaponComponent::StartFiring()
 {
-	//Base Class Does Nothing
+	bIsHoldingTrigger = true;
+	TryFire();
+}
+
+void UTP_WeaponComponent::StopFiring()
+{
+	bIsHoldingTrigger = false;
+}
+
+void UTP_WeaponComponent::TryFire()
+{
+	if (!CanFire || !FireMode) return;
+	
+	FireMode->Fire();
+	
+	CanFire = false;
+	
+	GetWorld()->GetTimerManager().SetTimer(FireRateTimer, this, &UTP_WeaponComponent::ResetCanFire, FireRate, false);
+	
 }
 
 void UTP_WeaponComponent::ResetCanFire()
@@ -54,55 +114,8 @@ void UTP_WeaponComponent::ResetCanFire()
 	CanFire = true;
 }
 
-bool UTP_WeaponComponent::AttachWeapon(AFPSTemplateCharacter* TargetCharacter)
-{
-	Character = TargetCharacter;
-
-	// Check that the character is valid, and has no weapon component yet
-	if (Character == nullptr)
-	{
-		return false;
-	}
-
-	// Attach the weapon to the First Person Character
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-
-	// Set up action bindings
-	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
-			Subsystem->AddMappingContext(FireMappingContext, 1);
-		}
-
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
-		{
-			// Fire
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
-		}
-	}
-
-	return true;
-}
-
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	// ensure we have a character owner
-	if (Character != nullptr)
-	{
-		// remove the input mapping context from the Player Controller
-		if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
-		{
-			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-			{
-				Subsystem->RemoveMappingContext(FireMappingContext);
-			}
-		}
-	}
-
-	// maintain the EndPlay call chain
 	Super::EndPlay(EndPlayReason);
 }
 

@@ -15,28 +15,10 @@ ATP_WeaponPickUp::ATP_WeaponPickUp()
 void ATP_WeaponPickUp::BeginPlay()
 {
 	Super::BeginPlay();
-	PickUpComponent = FindComponentByClass<UTP_PickUpComponent>();
-	
-
-	
-	if (PickUpComponent != nullptr)
-	{
-		WeaponPickUp = FindComponentByClass<UTP_WeaponComponent>();
-		if (WeaponPickUp != nullptr)
-		{
-			PickUpComponent->OnPickUp.AddDynamic(this,&ATP_WeaponPickUp::AttachWeapon);
-		}
-	}
-	
 }
 
 void ATP_WeaponPickUp::AttachWeapon(AFPSTemplateCharacter* PickUpCharacter)
 {
-	if (WeaponPickUp && PickUpCharacter)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString::Printf(TEXT("OnPickUp Fire")));
-			WeaponPickUp->AttachWeapon(PickUpCharacter);
-	}
 }
 
 

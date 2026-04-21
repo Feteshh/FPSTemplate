@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WeaponEffectTypes.h"
 #include "GameFramework/Actor.h"
 #include "FPSTemplateProjectile.generated.h"
 
@@ -33,5 +34,11 @@ public:
 	USphereComponent* GetCollisionComp() const { return CollisionComp; }
 	/** Returns ProjectileMovement subobject **/
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FWeaponEffect> Effects;
 };
 

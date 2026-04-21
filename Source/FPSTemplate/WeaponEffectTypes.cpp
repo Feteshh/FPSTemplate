@@ -1,0 +1,2 @@
+#include "WeaponEffectTypes.h"
+

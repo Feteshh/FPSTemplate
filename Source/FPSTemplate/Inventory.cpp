@@ -119,6 +119,9 @@ int UInventory::GetItemQuantity(const FInventorySlot& Slot)
 
 void UInventory::EquipSelectedItem()
 {
+	UE_LOG(LogTemp, Error, TEXT("AttachWeapon: FireAction is NULL"));
+
+	
 	if (EquippedActor) // Destroys current equipped item
 	{
 		EquippedActor->Destroy();
@@ -155,7 +158,21 @@ void UInventory::EquipSelectedItem()
 	
 	if (UTP_WeaponComponent* WeaponComponent = EquippedActor->FindComponentByClass<UTP_WeaponComponent>())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("WeaponComponent FOUND: %s"), *WeaponComponent->GetName());
 		WeaponComponent->AttachWeapon(Character);
+		Character->CurrentWeapon = WeaponComponent;
+		Character->SetupPlayerInputComponent(Character->InputComponent);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("NO WeaponComponent found on %s"), *EquippedActor->GetName());
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Components on %s:"), *EquippedActor->GetName());
+	
+	for (UActorComponent* C : EquippedActor->GetComponents())
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" - %s (%s)"), *C->GetName(), *C->GetClass()->GetName());
 	}
 }
 
