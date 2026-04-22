@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FPSTemplateCharacter.h"
 #include "Item.h"
 #include "Components/ActorComponent.h"
-#include "Inventory.generated.h"
+#include "InventoryComponent.generated.h"
 
 
 USTRUCT(BlueprintType)
@@ -23,13 +24,13 @@ struct FInventorySlot
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class FPSTEMPLATE_API UInventory : public UActorComponent
+class FPSTEMPLATE_API UInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UInventory();
+	UInventoryComponent();
 
 protected:
 	// Called when the game starts
@@ -62,7 +63,11 @@ public:
 	
 	UFUNCTION(blueprintCallable)
 	int GetItemQuantity(const FInventorySlot& Slot);
-	
+
+	void EquipActorItem(const FItemData& ItemData, AFPSTemplateCharacter* Character);
+
+	void ApplyConsumableEffect(const FItemData* ItemData, AFPSTemplateCharacter* Character);
+	void RemoveOneFromSlot(int32 INT32);
 	UFUNCTION(BlueprintCallable)
 	void EquipSelectedItem();
 	
@@ -70,5 +75,5 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void DropItem();
-	
+	void UseSelectedItem();
 };

@@ -4,6 +4,7 @@
 #include "EffectComponent.h"
 
 #include "HealthComponent.h"
+#include "PipelineFileCache.h"
 #include "PlayerStatsComponent.h"
 #include "DSP/AudioDebuggingUtilities.h"
 
@@ -64,6 +65,23 @@ void UEffectComponent::ApplyEffect(EEffectType Type, float Magnitude, float Dura
 	NewEffect.bStacks = bStacks;
 	
 	ActiveEffects.Add(NewEffect);
+	
+	AActor* Owner = GetOwner();
+	
+	if (Type == EEffectType::SpeedBoost)
+	{
+		if (UPlayerStatsComponent* Stats = Owner->FindComponentByClass<UPlayerStatsComponent>())
+		{
+			Stats->ApplySpeedMultiplier(Magnitude);
+		}
+	}
+	if (Type == EEffectType::HighJump)
+	{
+		if (UPlayerStatsComponent* Stats = Owner->FindComponentByClass<UPlayerStatsComponent>())
+		{
+			Stats->ApplyJumpMultiplier(Magnitude);
+		}
+	}
 }
 
 void UEffectComponent::RemoveEffect(EEffectType Type)
@@ -147,17 +165,6 @@ void UEffectComponent::ApplyEffectTick(const FActiveEffect& Effect)
 			Owner->SetActorScale3D(Scale);
 		}
 		break;
-		
-	case EEffectType::HighJump:
-		if (UPlayerStatsComponent* Stats = Owner->FindComponentByClass<UPlayerStatsComponent>())
-		{
-			Stats->ApplyJumpMultiplier(2.f);
-		}
-		case EEffectType::SpeedBoost:
-		if (UPlayerStatsComponent* Stats = Owner->FindComponentByClass<UPlayerStatsComponent>())
-		{
-			Stats->ApplySpeedMultiplier(2.f);
-		}
 	default:
 		break;
 	}

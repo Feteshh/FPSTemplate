@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
 #include "FPSTemplateCharacter.h"
-#include "Inventory.h"
+#include "InventoryComponent.h"
 #include "TP_PickUpComponent.generated.h"
 
 // Declaration of the delegate that will be called when someone picks this up

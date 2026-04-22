@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "FPSTemplateCharacter.h"
-#include "FPSTemplateProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -9,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "InventoryComponent.h"
 #include "TP_WeaponComponent.h"
 #include "Engine/LocalPlayer.h"
 
@@ -36,6 +36,11 @@ AFPSTemplateCharacter::AFPSTemplateCharacter()
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	Health = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
+	Effects = CreateDefaultSubobject<UEffectComponent>(TEXT("Effects"));
+	
+	
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -69,6 +74,7 @@ void AFPSTemplateCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFPSTemplateCharacter::Look);
 		
+		EnhancedInputComponent->BindAction(UseItemAction, ETriggerEvent::Started , this, &AFPSTemplateCharacter::UseItem);
 		
 		if (CurrentWeapon && CurrentWeapon->FireAction)
 		{
@@ -106,5 +112,14 @@ void AFPSTemplateCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+
+void AFPSTemplateCharacter::UseItem()
+{
+	if (Inventory)
+	{
+		Inventory->UseSelectedItem();
 	}
 }

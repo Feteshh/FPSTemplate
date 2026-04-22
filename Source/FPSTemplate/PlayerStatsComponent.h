@@ -13,6 +13,12 @@ class FPSTEMPLATE_API UPlayerStatsComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	
+	UPlayerStatsComponent();
+	
+	
+	virtual void BeginPlay() override;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float BaseWalkSpeed = 500.f;
 	

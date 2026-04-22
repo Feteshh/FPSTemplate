@@ -25,7 +25,6 @@ TArray<FVector> UShotgunPattern::GenerateDirections(const FVector& Forward)
 		
 		DirectionsArray.Add(ShotDirection);
 		
-		UE_LOG(LogTemp, Warning, TEXT("DirectionsArray[%d]"), i);
 	}
 	return DirectionsArray;
 }

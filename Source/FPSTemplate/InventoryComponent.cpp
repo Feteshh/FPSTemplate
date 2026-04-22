@@ -1,14 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Inventory.h"
+#include "InventoryComponent.h"
 
+#include "EffectComponent.h"
 #include "FPSTemplateCharacter.h"
 #include "Item.h"
 #include "TP_WeaponComponent.h"
+#include "Chaos/ClusterUnionManager.h"
 
 // Sets default values for this component's properties
-UInventory::UInventory()
+UInventoryComponent::UInventoryComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -21,7 +23,7 @@ UInventory::UInventory()
 
 
 // Called when the game starts
-void UInventory::BeginPlay()
+void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -32,14 +34,14 @@ void UInventory::BeginPlay()
 
 
 // Called every frame
-void UInventory::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
 }
 
-bool UInventory::AddItem(FDataTableRowHandle ItemRow)
+bool UInventoryComponent::AddItem(FDataTableRowHandle ItemRow)
 {
 	if (!ItemRow.DataTable)
 		return false;
@@ -76,7 +78,7 @@ bool UInventory::AddItem(FDataTableRowHandle ItemRow)
 	return false;
 }
 
-void UInventory::SelectSlot(int NewIndex)
+void UInventoryComponent::SelectSlot(int NewIndex)
 {
 	if (NewIndex < 0)
 	{
@@ -91,7 +93,7 @@ void UInventory::SelectSlot(int NewIndex)
 		SelectedSlotIndex = FMath::Clamp(NewIndex, 0, InventorySlots.Num() - 1);
 }
 
-FString UInventory::GetItemNameFromSlot(const FInventorySlot& Slot)
+FString UInventoryComponent::GetItemNameFromSlot(const FInventorySlot& Slot)
 {
 	if (!Slot.ItemRow.DataTable)
 		return "Empty";
@@ -104,7 +106,7 @@ FString UInventory::GetItemNameFromSlot(const FInventorySlot& Slot)
 	return ItemData->ItemName;
 }
 
-int UInventory::GetItemQuantity(const FInventorySlot& Slot)
+int UInventoryComponent::GetItemQuantity(const FInventorySlot& Slot)
 {
 	if (!Slot.ItemRow.DataTable)
 		return 0;
@@ -117,11 +119,51 @@ int UInventory::GetItemQuantity(const FInventorySlot& Slot)
 	return Slot.Quantity;
 }
 
-void UInventory::EquipSelectedItem()
+void UInventoryComponent::EquipActorItem(const FItemData& ItemData, AFPSTemplateCharacter* Character)
 {
-	UE_LOG(LogTemp, Error, TEXT("AttachWeapon: FireAction is NULL"));
-
+	if (!ItemData.EquipActorClass)
+		return;
 	
+	EquippedActor = GetWorld()->SpawnActor<AActor>(ItemData.EquipActorClass);
+	if (!EquippedActor)
+		return;
+	
+	EquippedActor->AttachToComponent(Character->GetMesh1P(),FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("GripPoint"));
+	
+	if (UTP_WeaponComponent* WeaponComponent = EquippedActor->FindComponentByClass<UTP_WeaponComponent>())
+	{
+		WeaponComponent->AttachWeapon(Character);
+		Character->CurrentWeapon = WeaponComponent;
+		Character->SetupPlayerInputComponent(Character->InputComponent);
+	}
+}
+
+void UInventoryComponent::ApplyConsumableEffect(const FItemData* ItemData, AFPSTemplateCharacter* Character)
+{
+	if (UEffectComponent* Effects = Character->FindComponentByClass<UEffectComponent>())
+	{
+		Effects->ApplyEffect(
+			ItemData->GrantedEffect,
+			ItemData->EffectMagnitude,
+			ItemData->EffectDuration,
+			ItemData->EffectTickInterval,
+			false);
+	}
+}
+
+void UInventoryComponent::RemoveOneFromSlot(int32 SlotIndex)
+{
+	FInventorySlot& Slot = InventorySlots[SlotIndex];
+	Slot.Quantity--;
+	
+	if (Slot.Quantity <= 0)
+	{
+		Slot.ItemRow = FDataTableRowHandle();
+	}
+}
+
+void UInventoryComponent::EquipSelectedItem()
+{
 	if (EquippedActor) // Destroys current equipped item
 	{
 		EquippedActor->Destroy();
@@ -139,44 +181,29 @@ void UInventory::EquipSelectedItem()
 	if (!ItemData)
 		return;
 	
-	if (!ItemData->EquipActorClass)
-		return;
+	AFPSTemplateCharacter* Character = Cast<AFPSTemplateCharacter>(GetOwner());
+	if (!Character) return;
 	
-	AActor* OwnerActor = GetOwner();
-	if (!OwnerActor)
-		return;
-	
-	AFPSTemplateCharacter* Character = Cast<AFPSTemplateCharacter>(OwnerActor);
-	if (!Character)
-		return;
-	
-	EquippedActor = GetWorld()->SpawnActor<AActor>(ItemData->EquipActorClass);
-	if (!EquippedActor) 
-		return;
-	
-	EquippedActor->AttachToComponent(Character->GetMesh1P(),FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("GripPoint"));
-	
-	if (UTP_WeaponComponent* WeaponComponent = EquippedActor->FindComponentByClass<UTP_WeaponComponent>())
+	switch (ItemData->ItemType)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("WeaponComponent FOUND: %s"), *WeaponComponent->GetName());
-		WeaponComponent->AttachWeapon(Character);
-		Character->CurrentWeapon = WeaponComponent;
-		Character->SetupPlayerInputComponent(Character->InputComponent);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("NO WeaponComponent found on %s"), *EquippedActor->GetName());
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Components on %s:"), *EquippedActor->GetName());
+	case EItemType::Gun:
+		EquipActorItem(*ItemData, Character);
+		break;
+		
+	case EItemType::Consumable:
+		break;
+		
+	case EItemType::Key:
+		//door checks inventory
+		break;
 	
-	for (UActorComponent* C : EquippedActor->GetComponents())
-	{
-		UE_LOG(LogTemp, Warning, TEXT(" - %s (%s)"), *C->GetName(), *C->GetClass()->GetName());
+	case EItemType::Standard:
+	default:
+		break;
 	}
 }
 
-void UInventory::CheckCurrentSlot(const FInventorySlot& Slot)
+void UInventoryComponent::CheckCurrentSlot(const FInventorySlot& Slot)
 {
 	if (InventorySlots.IsValidIndex(SelectedSlotIndex))
 	{
@@ -187,7 +214,7 @@ void UInventory::CheckCurrentSlot(const FInventorySlot& Slot)
 	}
 }
 
-void UInventory::DropItem()
+void UInventoryComponent::DropItem()
 {
 	
 	if (!InventorySlots.IsValidIndex(SelectedSlotIndex))
@@ -230,7 +257,38 @@ void UInventory::DropItem()
 	
 }
 
-
+void UInventoryComponent::UseSelectedItem()
+{
+	if (!InventorySlots.IsValidIndex(SelectedSlotIndex))
+		return;
+	
+	FInventorySlot& Slot = InventorySlots[SelectedSlotIndex];
+	if (Slot.Quantity <= 0)
+		return;
+	
+	FItemData* ItemData = Slot.ItemRow.GetRow<FItemData>("UseSelectedItem");
+	if (!ItemData)
+		return;
+	
+	AFPSTemplateCharacter* Character = Cast<AFPSTemplateCharacter>(GetOwner());
+	if (!Character) 
+		return;
+	
+	switch (ItemData->ItemType)
+	{
+	case EItemType::Consumable:
+		ApplyConsumableEffect(ItemData, Character);
+		RemoveOneFromSlot(SelectedSlotIndex);
+		break;
+		
+	case EItemType::Key:
+		
+		break;
+		
+	default:
+		break;
+	}
+}
 
 
 

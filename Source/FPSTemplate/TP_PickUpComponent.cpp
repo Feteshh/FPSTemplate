@@ -25,7 +25,7 @@ void UTP_PickUpComponent::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCo
 	if(!Character)
 		return;
 	
-	UInventory* Inventory = Character->FindComponentByClass<UInventory>();
+	UInventoryComponent* Inventory = Character->FindComponentByClass<UInventoryComponent>();
 	if (!Inventory)
 		return;
 	

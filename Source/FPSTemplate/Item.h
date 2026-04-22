@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EffectType.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
@@ -48,16 +49,22 @@ struct FItemData : public FTableRowBase
 	TSubclassOf<AActor> EquipActorClass;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float BaseValue;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Weight;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bStackable = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 MaxStackSize = 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	EEffectType GrantedEffect = EEffectType::None;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	float EffectMagnitude = 0.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	float EffectDuration = 0.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	float EffectTickInterval = 1.f;
 };
 
 UCLASS()
