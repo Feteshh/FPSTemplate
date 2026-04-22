@@ -63,7 +63,10 @@ public:
 	
 	UFUNCTION(blueprintCallable)
 	int GetItemQuantity(const FInventorySlot& Slot);
-
+	
+	UFUNCTION(BlueprintCallable)
+	bool HasItem(FName RowName) const;
+	
 	void EquipActorItem(const FItemData& ItemData, AFPSTemplateCharacter* Character);
 
 	void ApplyConsumableEffect(const FItemData* ItemData, AFPSTemplateCharacter* Character);

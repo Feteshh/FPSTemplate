@@ -119,6 +119,18 @@ int UInventoryComponent::GetItemQuantity(const FInventorySlot& Slot)
 	return Slot.Quantity;
 }
 
+bool UInventoryComponent::HasItem(FName RowName) const
+{
+	for (const FInventorySlot& Slot : InventorySlots)
+	{
+		if (Slot.Quantity > 0 && Slot.ItemRow.RowName == RowName)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void UInventoryComponent::EquipActorItem(const FItemData& ItemData, AFPSTemplateCharacter* Character)
 {
 	if (!ItemData.EquipActorClass)
