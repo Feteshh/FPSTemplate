@@ -44,8 +44,7 @@ void AItem::InitializeItem(FDataTableRowHandle NewItemRow)
 
 	if (ItemTextDisplay)
 	{
-		if (FItemData* ItemData =
-			ItemRow.GetRow<FItemData>("InitializeItem"))
+		if (FItemData* ItemData = ItemRow.GetRow<FItemData>("InitializeItem"))
 		{
 			ItemTextDisplay->UpdateTitle(
 				ItemData->ItemName,

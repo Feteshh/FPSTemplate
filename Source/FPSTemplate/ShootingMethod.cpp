@@ -14,7 +14,7 @@ void UShootingMethod::FireOneShot_Implementation(const FVector& Start, const FVe
 	
 	for (const FVector& Dir : Directions)
 	{
-		FireSingle(Start, Direction);
+		FireSingle(Start, Dir);// Uses Calculated Direction
 	}
 }
 

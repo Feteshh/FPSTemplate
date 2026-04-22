@@ -53,11 +53,9 @@ void UTP_WeaponComponent::AttachWeapon(AFPSTemplateCharacter* TargetCharacter)
 
 	if (!FireAction)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AttachWeapon: FireAction is NULL"));
 		return;
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("AttachWeapon: Binding FireAction to %s"), *GetName());
+	
 
 	EIC->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
 	EIC->BindAction(FireAction, ETriggerEvent::Started, this, &UTP_WeaponComponent::StartFiring);

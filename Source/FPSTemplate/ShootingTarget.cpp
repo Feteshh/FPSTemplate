@@ -18,6 +18,7 @@ AShootingTarget::AShootingTarget()
 	Mesh->SetCollisionProfileName("BlockAll");
 	
 	Health = CreateDefaultSubobject<UHealthComponent>("Health");
+	Effects = CreateDefaultSubobject<UEffectComponent>("Effects");
 }
 
 // Called when the game starts or when spawned
