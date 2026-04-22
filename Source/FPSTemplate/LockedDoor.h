@@ -17,18 +17,38 @@ public:
 	ALockedDoor();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+	
+	UPROPERTY(VisibleAnywhere)
+    	UStaticMeshComponent* DoorMesh;
+	
+	UPROPERTY(visibleAnywhere)
+    	UBoxComponent* TriggerCollider;
+	
+	UPROPERTY(EditAnywhere, Category = "Door")
 	TArray<FName> RequiredKeys;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
-	UStaticMeshComponent* DoorMesh;
+	UPROPERTY(EditAnywhere, Category = "Door")
+	float OpenDuration = 3.f;
+	
+	UPROPERTY(EditAnywhere, Category = "Door")
+	float SlideSpeed = 200.f;
+	
+	UPROPERTY(EditAnywhere, Category = "Door")
+	FVector OpenOffset = FVector(0, 0, 200);
+	
+	bool DoorOpen = false;
+	bool Locked = true;
+	
+	FVector ClosedLocation;
+	FVector OpenedLocation;
+	
+	FTimerHandle DoorTimerHandle;
 	
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherOverlappedComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
-	UBoxComponent* TriggerCollider;
 	
 	void OpenDoor();
-	
+	void CloseDoor();
 };

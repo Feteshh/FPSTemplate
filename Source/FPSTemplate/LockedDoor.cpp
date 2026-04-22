@@ -9,8 +9,7 @@
 // Sets default values
 ALockedDoor::ALockedDoor()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	DoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorMesh"));
 	RootComponent = DoorMesh;
@@ -20,10 +19,31 @@ ALockedDoor::ALockedDoor()
 	TriggerCollider->OnComponentBeginOverlap.AddDynamic(this, &ALockedDoor::OnOverlapBegin);
 }
 
+void ALockedDoor::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	ClosedLocation = GetActorLocation();
+	OpenedLocation = ClosedLocation + OpenOffset;
+}
+
+void ALockedDoor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	FVector Current = GetActorLocation();
+	FVector Target = DoorOpen ? OpenedLocation : ClosedLocation;
+	
+	FVector NewLocation = FMath::VInterpConstantTo(Current,Target,DeltaTime,SlideSpeed);
+	SetActorLocation(NewLocation);
+}
+
 
 void ALockedDoor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-	UPrimitiveComponent* OtherOverlappedComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                 UPrimitiveComponent* OtherOverlappedComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!Locked) return;
+	
 	AFPSTemplateCharacter* Character = Cast<AFPSTemplateCharacter>(OtherActor);
 	if (!Character) return;
 	
@@ -44,11 +64,25 @@ void ALockedDoor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 
 void ALockedDoor::OpenDoor()
 {
+	Locked = false;
+	DoorOpen = true;
+	
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Door Unlocked!"));
 	
-	FRotator NewRotation = GetActorRotation();
-	NewRotation.Yaw += 90.f;
-	SetActorRotation(NewRotation);
+	GetWorld()->GetTimerManager().SetTimer(
+		DoorTimerHandle,
+		this,
+		&ALockedDoor::CloseDoor,
+		OpenDuration,
+		false);
+}
+
+void ALockedDoor::CloseDoor()
+{
+	DoorOpen = false;
+	Locked = true;
+	
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("Door Locked!"));
 }
 
 
