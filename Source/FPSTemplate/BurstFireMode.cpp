@@ -18,7 +18,6 @@ void UBurstFireMode::FireNextShot()
 	if (ShotsFired >= BurstCount) return;
 	
 	FVector Start, Direction; 
-
 	Weapon->ComputeFireStartAndDirection(Start, Direction);
 	
 	Weapon->ShootingMethod->FireOneShot(Start, Direction);
@@ -27,7 +26,10 @@ void UBurstFireMode::FireNextShot()
 	
 	if (ShotsFired < BurstCount)
 	{
-		float Interval = Weapon->FireRate * BurstIntervalPercentage;
+		// gets a new duration that is a percentage of FireRate to shoot all bursts in
+		float TotalBurstDuration = Weapon->FireRate * BurstIntervalPercentage; 
+		
+		float Interval = TotalBurstDuration / (BurstCount - 1);
 		
 		Weapon->GetWorld()->GetTimerManager().SetTimer(BurstFireTimer,this,&UBurstFireMode::FireNextShot,Interval,false);
 	}

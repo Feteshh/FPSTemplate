@@ -41,6 +41,7 @@ void UHealthComponent::ApplyHealing(float Amount)
 	BroadcastHealthChanged();
 }
 
+
 void UHealthComponent::BroadcastHealthChanged()
 {
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);

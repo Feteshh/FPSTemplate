@@ -43,6 +43,13 @@ public:
 	void ApplyHealing(float Amount);
 	
 	UFUNCTION(BlueprintCallable, Category = "Health")
+	void ResetHealth()
+	{
+		CurrentHealth = MaxHealth;
+		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+	}
+	
+	UFUNCTION(BlueprintCallable, Category = "Health")
 	float GetCurrentHealth() const { return CurrentHealth; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Health")

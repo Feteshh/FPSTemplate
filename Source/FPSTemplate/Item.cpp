@@ -10,8 +10,8 @@
 // Sets default values
 AItem::AItem()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
 	Model = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item Model"));
 	RootComponent = Model;
 	
@@ -20,38 +20,40 @@ AItem::AItem()
 	
 	ItemTextDisplay = CreateDefaultSubobject<UFaceCameraTextRenderComponent>(TEXT("Item Text Display"));
 	ItemTextDisplay->SetupAttachment(Model);	
-	
 }
 
-// Called when the game starts or when spawned
+void AItem::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	
+	InitializeItem(ItemRow);
+}
+
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
 }
 
 void AItem::InitializeItem(FDataTableRowHandle NewItemRow)
 {
-	
 	ItemRow = NewItemRow;
 
-	if (ItemTextDisplay)
+	if (!ItemTextDisplay) return;
+
+	if (FItemData* ItemData = ItemRow.GetRow<FItemData>("InitializeItem"))
 	{
-		if (FItemData* ItemData = ItemRow.GetRow<FItemData>("InitializeItem"))
-		{
-			ItemTextDisplay->UpdateTitle(
-				ItemData->ItemName,
-				RarityColor[ItemData->Rarity]
-			);
-		}
+		const FColor* ColorPointer = RarityColor.Find(ItemData->Rarity);
+		FColor Color = ColorPointer ? *ColorPointer : FColor::White;
+		
+		ItemTextDisplay->UpdateTitle(ItemData->ItemName, Color);
 	}
+		
 }
 
 

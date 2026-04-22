@@ -26,9 +26,9 @@ void UFaceCameraTextRenderComponent::TickComponent(float DeltaTime, ELevelTick T
 			FVector cameraLoc = CameraManager->GetCameraLocation();
 			
 			FRotator lookAt = UKismetMathLibrary::FindLookAtRotation(
-				 GetOwner()->GetActorLocation(),
+				 GetComponentLocation(),
 				cameraLoc);
-			SetRelativeRotation(lookAt);
+			SetWorldRotation(lookAt);
 		}
 	}
 }

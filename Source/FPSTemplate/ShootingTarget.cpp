@@ -40,11 +40,17 @@ void AShootingTarget::ApplyDamage_Implementation(float Amount)
 	{
 		Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(0,1,0));
 	}
+	if (Effects->HasEffect(EEffectType::Burn))
+	{
+		Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(1,0,0));
+	}
 }
 
 void AShootingTarget::OnDeath()
 {
 	Mesh->SetSimulatePhysics(true);
+	
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White,TEXT("Death"));
 	
 	FTimerHandle ResetTimer;
 	
@@ -55,7 +61,8 @@ void AShootingTarget::OnDeath()
 		SetActorLocation(InitialLocation);
 		SetActorRotation(InitialRotation);
 		
-		Health->ApplyHealing(9999.f);
+		Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(0,0,0));
+		Health->ResetHealth();
 		Effects->RemoveAllEffects();
 	},2.f,false);
 }

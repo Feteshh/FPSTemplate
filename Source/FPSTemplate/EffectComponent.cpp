@@ -4,6 +4,8 @@
 #include "EffectComponent.h"
 
 #include "HealthComponent.h"
+#include "PlayerStatsComponent.h"
+#include "DSP/AudioDebuggingUtilities.h"
 
 // Sets default values for this component's properties
 UEffectComponent::UEffectComponent()
@@ -32,6 +34,7 @@ void UEffectComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		
 		if (Effect.TimeRemaining <= 0.f)
 		{
+			OnEffectExpired(Effect);
 			ActiveEffects.RemoveAt(i);
 		}
 	}
@@ -87,8 +90,10 @@ void UEffectComponent::RemoveAllEffects()
 	
 	if (UMeshComponent* Mesh = GetOwner()->FindComponentByClass<UMeshComponent>())
 	{
-		Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(1,1,1));
+		Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(0,0,0));
 	}
+	
+	GetOwner()->SetActorScale3D(FVector(1,1,1));
 }
 
 void UEffectComponent::ProcessEffect(FActiveEffect& Effect, float DeltaTime)
@@ -107,18 +112,80 @@ void UEffectComponent::ApplyEffectTick(const FActiveEffect& Effect)
 {
 	if (!HealthComponent) return;
 	
+	AActor* Owner = GetOwner();
+	UMeshComponent* Mesh = GetOwner()->FindComponentByClass<UMeshComponent>();
+	
 	switch (Effect.EffectType)
 	{
+		
 	case EEffectType::Poison:
+		HealthComponent->ApplyDamage(Effect.Magnitude);
+		if (Mesh) Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(0,1,0));
+		break;
+	
 	case EEffectType::Burn:
 		HealthComponent->ApplyDamage(Effect.Magnitude);
+		if (Mesh) Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(1,0,0));
 		break;
+		
 	case EEffectType::HealOverTime:
 		HealthComponent->ApplyHealing(Effect.Magnitude);
 		break;
-	case EEffectType::Slow:
+	
+	case EEffectType::Heal:
+		HealthComponent->ApplyHealing(Effect.Magnitude);
 		break;
 		
+	case EEffectType::ClearDebuff:
+		RemoveAllEffects();
+		break;
+		
+	case EEffectType::IncreaseSize:
+		if (Owner)
+		{
+			FVector Scale = Owner->GetActorScale3D() + FVector(Effect.Magnitude);
+			Owner->SetActorScale3D(Scale);
+		}
+		break;
+		
+	case EEffectType::HighJump:
+		if (UPlayerStatsComponent* Stats = Owner->FindComponentByClass<UPlayerStatsComponent>())
+		{
+			Stats->ApplyJumpMultiplier(2.f);
+		}
+		case EEffectType::SpeedBoost:
+		if (UPlayerStatsComponent* Stats = Owner->FindComponentByClass<UPlayerStatsComponent>())
+		{
+			Stats->ApplySpeedMultiplier(2.f);
+		}
+	default:
+		break;
+	}
+}
+
+void UEffectComponent::OnEffectExpired(const FActiveEffect& Effect)
+{
+	AActor* Owner = GetOwner();
+	UMeshComponent* Mesh = GetOwner()->FindComponentByClass<UMeshComponent>();
+	
+	switch (Effect.EffectType)
+	{
+		case EEffectType::Poison:
+		case EEffectType::Burn:
+		if (Mesh) Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(0,0,0));
+		break;
+		
+	case EEffectType::IncreaseSize:
+		Owner->SetActorScale3D(FVector(1,1,1));
+		break;
+		
+	case EEffectType::SpeedBoost:
+	case EEffectType::HighJump:
+		if (UPlayerStatsComponent* Stats = Owner->FindComponentByClass<UPlayerStatsComponent>())
+		{
+			Stats->ResetStats();
+		}
+		break;
 	default:
 		break;
 	}

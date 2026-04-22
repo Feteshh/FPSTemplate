@@ -46,6 +46,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY()
@@ -71,6 +72,6 @@ public:
 private:
 	void ProcessEffect(FActiveEffect& Effect, float DeltaTime);
 	void ApplyEffectTick(const FActiveEffect& Effect);
-	
+	void OnEffectExpired(const FActiveEffect& Effect);
 		
 };

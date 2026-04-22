@@ -37,18 +37,25 @@ struct FItemData : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString ItemName;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ERarity Rarity;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EItemType ItemType;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> EquipActorClass;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float BaseValue;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Weight;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bStackable = false;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 MaxStackSize = 1;
 };
@@ -59,15 +66,14 @@ class FPSTEMPLATE_API AItem : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AItem();
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+	
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -85,11 +91,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UFaceCameraTextRenderComponent* ItemTextDisplay;
 	
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* Collider;
-	
-	
-	
-	
 };
