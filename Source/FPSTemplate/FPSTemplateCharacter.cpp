@@ -37,8 +37,6 @@ AFPSTemplateCharacter::AFPSTemplateCharacter()
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
 	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
-	Health = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
-	Effects = CreateDefaultSubobject<UEffectComponent>(TEXT("Effects"));
 	
 	
 }

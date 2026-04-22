@@ -21,8 +21,9 @@ void UBurstFireMode::FireNextShot()
 	Weapon->ComputeFireStartAndDirection(Start, Direction);
 	
 	Weapon->ShootingMethod->FireOneShot(Start, Direction);
-	
 	ShotsFired++;
+	
+	PlayFireSound();
 	
 	if (ShotsFired < BurstCount)
 	{

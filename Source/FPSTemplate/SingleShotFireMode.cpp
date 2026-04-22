@@ -13,4 +13,6 @@ void USingleShotFireMode::Fire_Implementation()
 	Weapon->ComputeFireStartAndDirection(Start, Direction);
 	
 	Weapon->ShootingMethod->FireOneShot(Start, Direction);
+	
+	PlayFireSound();
 }

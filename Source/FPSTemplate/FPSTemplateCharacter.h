@@ -3,8 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EffectComponent.h"
-#include "HealthComponent.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "FPSTemplateCharacter.generated.h"
@@ -14,9 +12,7 @@ class USkeletalMeshComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
-class UHealthComponent;
 class UInventoryComponent;
-class UEffectComponent;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -56,12 +52,7 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UInventoryComponent* Inventory;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UHealthComponent* Health;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UEffectComponent* Effects;
+
 	
 	
 public:

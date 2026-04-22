@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FPSTemplateCharacter.h"
 #include "Item.h"
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
 
+class AFPSTemplateCharacter;
 
 USTRUCT(BlueprintType)
 struct FInventorySlot

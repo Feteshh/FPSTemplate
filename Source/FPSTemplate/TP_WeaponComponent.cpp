@@ -11,6 +11,7 @@
 #include "ShootingMethod.h"
 #include "Animation/AnimInstance.h"
 #include "Engine/LocalPlayer.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
@@ -105,6 +106,7 @@ void UTP_WeaponComponent::TryFire()
 	
 	GetWorld()->GetTimerManager().SetTimer(FireRateTimer, this, &UTP_WeaponComponent::ResetCanFire, FireRate, false);
 	
+
 }
 
 void UTP_WeaponComponent::ResetCanFire()

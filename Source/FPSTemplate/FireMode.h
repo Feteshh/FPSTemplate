@@ -26,4 +26,5 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void Fire();
+	void PlayFireSound();
 };
