@@ -154,13 +154,12 @@ void UInventoryComponent::EquipActorItem(const FItemData& ItemData, AFPSTemplate
 	if (!EquippedActor)
 		return;
 	
-	EquippedActor->AttachToComponent(Character->GetMesh1P(),FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("GripPoint"));
+	EquippedActor->AttachToComponent(Character->GetMesh1P(),FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("GripPoint"));
 	
 	if (UTP_WeaponComponent* WeaponComponent = EquippedActor->FindComponentByClass<UTP_WeaponComponent>())
 	{
 		WeaponComponent->AttachWeapon(Character);
 		Character->CurrentWeapon = WeaponComponent;
-		Character->SetupPlayerInputComponent(Character->InputComponent);
 	}
 }
 
