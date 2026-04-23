@@ -65,6 +65,9 @@ public:
 	int GetItemQuantity(const FInventorySlot& Slot);
 	
 	UFUNCTION(BlueprintCallable)
+	EItemType GetItemType(const FInventorySlot& Slot);
+	
+	UFUNCTION(BlueprintCallable)
 	bool HasItem(FName RowName) const;
 	
 	void EquipActorItem(const FItemData& ItemData, AFPSTemplateCharacter* Character);

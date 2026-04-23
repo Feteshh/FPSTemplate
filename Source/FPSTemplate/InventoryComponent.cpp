@@ -7,7 +7,6 @@
 #include "FPSTemplateCharacter.h"
 #include "Item.h"
 #include "TP_WeaponComponent.h"
-#include "Chaos/ClusterUnionManager.h"
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
@@ -117,6 +116,21 @@ int UInventoryComponent::GetItemQuantity(const FInventorySlot& Slot)
 		return -1;
 	
 	return Slot.Quantity;
+}
+
+EItemType UInventoryComponent::GetItemType(const FInventorySlot& Slot)
+{
+	if (!Slot.ItemRow.DataTable || !Slot.ItemRow.RowName.IsValid())
+	{
+		return EItemType::Standard;
+	}
+	
+	FItemData* ItemData = Slot.ItemRow.DataTable->FindRow<FItemData>(Slot.ItemRow.RowName, TEXT("GetItemType"));
+	
+	if (!ItemData)
+		 return EItemType::Standard;
+	
+	return ItemData->ItemType;
 }
 
 bool UInventoryComponent::HasItem(FName RowName) const
