@@ -73,7 +73,7 @@ public:
 	void EquipActorItem(const FItemData& ItemData, AFPSTemplateCharacter* Character);
 
 	void ApplyConsumableEffect(const FItemData* ItemData, AFPSTemplateCharacter* Character);
-	void RemoveOneFromSlot(int32 INT32);
+	void RemoveOneFromSlot(int32 Index);
 	UFUNCTION(BlueprintCallable)
 	void EquipSelectedItem();
 	

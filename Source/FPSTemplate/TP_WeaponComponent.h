@@ -61,7 +61,7 @@ public:
 	UPROPERTY(EditAnywhere, Instanced, BlueprintReadWrite, Category = "Weapon|FireMode")
 	UFireMode* FireMode;
 	
-	bool bIsHoldingTrigger = false;
+	bool IsHoldingTrigger = false;
 
 public:
 	UTP_WeaponComponent();

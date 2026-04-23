@@ -87,13 +87,13 @@ void UTP_WeaponComponent::Fire()
 
 void UTP_WeaponComponent::StartFiring()
 {
-	bIsHoldingTrigger = true;
+	IsHoldingTrigger = true;
 	TryFire();
 }
 
 void UTP_WeaponComponent::StopFiring()
 {
-	bIsHoldingTrigger = false;
+	IsHoldingTrigger = false;
 }
 
 void UTP_WeaponComponent::TryFire()

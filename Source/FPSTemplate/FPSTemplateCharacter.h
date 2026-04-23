@@ -52,10 +52,7 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UInventoryComponent* Inventory;
-
 	
-	
-public:
 	UPROPERTY()
 	class UTP_WeaponComponent* CurrentWeapon;
 	
@@ -80,6 +77,5 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-
 };
 

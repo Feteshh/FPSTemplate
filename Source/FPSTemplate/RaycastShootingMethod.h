@@ -29,7 +29,7 @@ public:
 	
 private:
 	bool Trace(const FVector& Start,const FVector& End, FHitResult& OutHit) const;
-	void SpawnBeamFX(const FVector& Start, const FVector& End, const FHitResult& Hit, bool bHit) const;
+	void SpawnBeamFX(const FVector& Start, const FVector& End, const FHitResult& Hit, bool isHit) const;
 	void SpawnHitFX(const FHitResult& Hit) const;
 	void ApplyPhysicsImpulse(const FHitResult& Hit, const FVector& Direction) const;
 };

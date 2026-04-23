@@ -38,8 +38,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Door")
 	FVector OpenOffset = FVector(0, 0, 200);
 	
-	bool DoorOpen = false;
-	bool Locked = true;
+	bool IsOpen = false;
+	bool IsLocked = true;
 	
 	FVector ClosedLocation;
 	FVector OpenedLocation;

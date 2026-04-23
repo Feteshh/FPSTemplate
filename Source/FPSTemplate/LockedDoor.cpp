@@ -32,7 +32,7 @@ void ALockedDoor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	FVector Current = GetActorLocation();
-	FVector Target = DoorOpen ? OpenedLocation : ClosedLocation;
+	FVector Target = IsOpen ? OpenedLocation : ClosedLocation;
 	
 	FVector NewLocation = FMath::VInterpConstantTo(Current,Target,DeltaTime,SlideSpeed);
 	SetActorLocation(NewLocation);
@@ -42,7 +42,7 @@ void ALockedDoor::Tick(float DeltaTime)
 void ALockedDoor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
                                  UPrimitiveComponent* OtherOverlappedComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!Locked) return;
+	if (!IsLocked) return;
 	
 	AFPSTemplateCharacter* Character = Cast<AFPSTemplateCharacter>(OtherActor);
 	if (!Character) return;
@@ -64,8 +64,8 @@ void ALockedDoor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 
 void ALockedDoor::OpenDoor()
 {
-	Locked = false;
-	DoorOpen = true;
+	IsLocked = false;
+	IsOpen = true;
 	
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Door Unlocked!"));
 	
@@ -79,8 +79,8 @@ void ALockedDoor::OpenDoor()
 
 void ALockedDoor::CloseDoor()
 {
-	DoorOpen = false;
-	Locked = true;
+	IsOpen = false;
+	IsLocked = true;
 	
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("Door Locked!"));
 }

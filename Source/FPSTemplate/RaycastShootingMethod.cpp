@@ -50,11 +50,11 @@ bool URaycastShootingMethod::Trace(const FVector& Start, const FVector& End, FHi
 	return Weapon->GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility);
 }
 
-void URaycastShootingMethod::SpawnBeamFX(const FVector& Start, const FVector& End, const FHitResult& Hit, bool bHit) const
+void URaycastShootingMethod::SpawnBeamFX(const FVector& Start, const FVector& End, const FHitResult& Hit, bool isHit) const
 {
 	if (!BeamParticles) return;
 
-	FVector BeamEnd = bHit ? Hit.ImpactPoint : End;
+	FVector BeamEnd = isHit ? Hit.ImpactPoint : End;
 
 	if (UNiagaraComponent* Beam = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		Weapon->GetWorld(), BeamParticles, Start, (End - Start).Rotation()))
