@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "EffectType.h"
+#include "WeaponEffectTypes.h"
 #include "Components/ActorComponent.h"
 #include "EffectComponent.generated.h"
 
@@ -56,6 +57,9 @@ protected:
 	TArray<FActiveEffect> ActiveEffects;
 	
 public:
+	
+	UFUNCTION(BlueprintCallable)
+	void ApplyEffects(const TArray<FWeaponEffect>& Effects);
 	
 	UFUNCTION(BlueprintCallable)
 	void ApplyEffect(EEffectType Type, float Magnitude, float Duration, float TickInterval = 1.f, bool bStacks = false);

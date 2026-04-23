@@ -33,6 +33,8 @@ public:
 	
 	void ApplySpeedMultiplier(float Multiplier);
 	void ApplyJumpMultiplier(float Multiplier);
+	void ResetSpeed();
+	void ResetJumpBoost();
 	void ResetStats();
 	
 };

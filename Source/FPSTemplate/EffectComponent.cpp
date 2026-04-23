@@ -3,6 +3,7 @@
 
 #include "EffectComponent.h"
 
+#include "FPSTemplateCharacter.h"
 #include "HealthComponent.h"
 #include "PipelineFileCache.h"
 #include "PlayerStatsComponent.h"
@@ -28,6 +29,25 @@ void UEffectComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
+	if (Cast<AFPSTemplateCharacter>(GetOwner()))
+	{
+		FString ActiveList = "Active Effects: ";
+
+		for (const FActiveEffect& Effect : ActiveEffects)
+		{
+			ActiveList += FString::Printf(TEXT("%s(%.1fs) "),
+				*UEnum::GetValueAsString(Effect.EffectType),
+				Effect.TimeRemaining);
+		}
+
+		GEngine->AddOnScreenDebugMessage(
+			2,                
+			0.0f,             
+			FColor::Yellow,
+			ActiveList
+		);
+	}
+	
 	for (int32 i = ActiveEffects.Num() - 1; i >= 0; i--)
 	{
 		FActiveEffect& Effect = ActiveEffects[i];
@@ -41,8 +61,29 @@ void UEffectComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 }
 
+void UEffectComponent::ApplyEffects(const TArray<FWeaponEffect>& Effects)
+{
+	for (const FWeaponEffect& Effect : Effects)
+	{
+		ApplyEffect(Effect.Type, Effect.Magnitude, Effect.Duration, Effect.TickInterval, Effect.bStacks);
+	}
+}
+
 void UEffectComponent::ApplyEffect(EEffectType Type, float Magnitude, float Duration, float TickInterval, bool bStacks)
 {
+	if (Type == EEffectType::ClearDebuff)
+	{
+		RemoveAllEffects();
+		return;
+	}
+	
+	if (Type == EEffectType::Heal)
+	{
+		if (HealthComponent)
+		HealthComponent->ApplyHealing(Magnitude);
+	}
+	
+	
 	if (!bStacks)
 	{
 		for (FActiveEffect& Effect : ActiveEffects)
@@ -52,6 +93,8 @@ void UEffectComponent::ApplyEffect(EEffectType Type, float Magnitude, float Dura
 				Effect.Duration = Duration;
 				Effect.TimeRemaining = Duration;
 				Effect.Magnitude = Magnitude;
+				
+				ApplyEffectTick(Effect);
 				return;
 			}
 		}
@@ -63,6 +106,8 @@ void UEffectComponent::ApplyEffect(EEffectType Type, float Magnitude, float Dura
 	NewEffect.TimeRemaining = Duration;
 	NewEffect.TickInterval = TickInterval;
 	NewEffect.bStacks = bStacks;
+	
+	ApplyEffectTick(NewEffect);
 	
 	ActiveEffects.Add(NewEffect);
 	
@@ -112,6 +157,11 @@ void UEffectComponent::RemoveAllEffects()
 	}
 	
 	GetOwner()->SetActorScale3D(FVector(1,1,1));
+	
+	if (UPlayerStatsComponent* Stats = GetOwner()->FindComponentByClass<UPlayerStatsComponent>())
+	{
+		Stats->ResetStats();
+	}
 }
 
 void UEffectComponent::ProcessEffect(FActiveEffect& Effect, float DeltaTime)
@@ -129,35 +179,59 @@ void UEffectComponent::ProcessEffect(FActiveEffect& Effect, float DeltaTime)
 void UEffectComponent::ApplyEffectTick(const FActiveEffect& Effect)
 {
 	if (!HealthComponent) return;
-	
+
 	AActor* Owner = GetOwner();
 	UMeshComponent* Mesh = GetOwner()->FindComponentByClass<UMeshComponent>();
-	
+
 	switch (Effect.EffectType)
 	{
-		
 	case EEffectType::Poison:
-		HealthComponent->ApplyDamage(Effect.Magnitude);
-		if (Mesh) Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(0,1,0));
-		break;
-	
+		{
+			HealthComponent->ApplyDamage(Effect.Magnitude);
+
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				1.0f,
+				FColor::Green,
+				FString::Printf(TEXT("Poison Tick: %f"), Effect.Magnitude));
+
+			if (Mesh) Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(0, 1, 0));
+			break;
+		}
 	case EEffectType::Burn:
-		HealthComponent->ApplyDamage(Effect.Magnitude);
-		if (Mesh) Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(1,0,0));
-		break;
-		
+		{
+			float DamageAmount = (Effect.Magnitude / 100.f) * HealthComponent->GetMaxHealth();
+			HealthComponent->ApplyDamage(DamageAmount);
+
+
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				1.0f,
+				FColor::Green,
+				FString::Printf(TEXT("Burn Tick: %f"), DamageAmount));
+
+			if (Mesh) Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(1, 0, 0));
+			break;
+		}
+	case EEffectType::ScarletRot:
+		{
+			float ScarletRotDamageAmount = (Effect.Magnitude / 100.f) * HealthComponent->GetCurrentHealth();
+			HealthComponent->ApplyDamage(ScarletRotDamageAmount);
+
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				1.0f,
+				FColor::Green,
+				FString::Printf(TEXT("Scarlet Rot Tick: %f"), ScarletRotDamageAmount));
+
+			if (Mesh) Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(0.541, 0.075, 0.851));
+			break;
+		}
 	case EEffectType::HealOverTime:
 		HealthComponent->ApplyHealing(Effect.Magnitude);
 		break;
 	
-	case EEffectType::Heal:
-		HealthComponent->ApplyHealing(Effect.Magnitude);
-		break;
-		
-	case EEffectType::ClearDebuff:
-		RemoveAllEffects();
-		break;
-		
+
 	case EEffectType::IncreaseSize:
 		if (Owner)
 		{
@@ -179,6 +253,7 @@ void UEffectComponent::OnEffectExpired(const FActiveEffect& Effect)
 	{
 		case EEffectType::Poison:
 		case EEffectType::Burn:
+		case EEffectType::ScarletRot:
 		if (Mesh) Mesh->SetVectorParameterValueOnMaterials("TintColor", FVector(0,0,0));
 		break;
 		
@@ -187,10 +262,15 @@ void UEffectComponent::OnEffectExpired(const FActiveEffect& Effect)
 		break;
 		
 	case EEffectType::SpeedBoost:
+		if (UPlayerStatsComponent* Stats = Owner->FindComponentByClass<UPlayerStatsComponent>())
+		{
+			Stats->ResetSpeed();
+		}
+		break;
 	case EEffectType::HighJump:
 		if (UPlayerStatsComponent* Stats = Owner->FindComponentByClass<UPlayerStatsComponent>())
 		{
-			Stats->ResetStats();
+			Stats->ResetJumpBoost();
 		}
 		break;
 	default:

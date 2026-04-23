@@ -22,8 +22,18 @@ void UHealthComponent::ApplyDamage(float Amount)
 {
 	if (Amount <= 0.f || IsDead()) return;
 	
-	CurrentHealth = FMath::Clamp(CurrentHealth - Amount, 0.f, MaxHealth);
+	GEngine->AddOnScreenDebugMessage(
+			-1,
+			1.0f,
+			FColor::Red,
+			FString::Printf(TEXT("%s took %.1f damage"),
+				*GetOwner()->GetName(),
+				Amount
+			)
+		);
 	
+	
+	CurrentHealth = FMath::Clamp(CurrentHealth - Amount, 0.f, MaxHealth);
 	BroadcastHealthChanged();
 	
 	if (CurrentHealth <= 0.f)
@@ -36,8 +46,18 @@ void UHealthComponent::ApplyHealing(float Amount)
 {
 	if (Amount <= 0.f || IsDead()) return;
 	
-	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.f, MaxHealth);
+	GEngine->AddOnScreenDebugMessage(
+			-1,
+			1.0f,
+			FColor::Green,
+			FString::Printf(TEXT("%s healed %.1f"),
+				*GetOwner()->GetName(),
+				Amount
+			)
+		);
 	
+	
+	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.f, MaxHealth);
 	BroadcastHealthChanged();
 }
 

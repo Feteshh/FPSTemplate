@@ -51,13 +51,24 @@ void UPlayerStatsComponent::ApplyJumpMultiplier(float Multiplier)
 	}
 }
 
-void UPlayerStatsComponent::ResetStats()
+void UPlayerStatsComponent::ResetSpeed()
 {
 	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
-		Character->GetCharacterMovement()->JumpZVelocity = BaseJumpZ;
-		
-		UE_LOG(LogTemp,Warning,TEXT("[Stats] Stats reset to base"))
 	}
+}
+
+void UPlayerStatsComponent::ResetJumpBoost()
+{
+	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
+	{
+		Character->GetCharacterMovement()->JumpZVelocity = BaseJumpZ;
+	}
+}
+
+void UPlayerStatsComponent::ResetStats()
+{
+	ResetSpeed();
+	ResetJumpBoost();
 }

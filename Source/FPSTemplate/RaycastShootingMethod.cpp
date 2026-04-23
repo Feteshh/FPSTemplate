@@ -19,7 +19,6 @@ void URaycastShootingMethod::FireSingle(const FVector& Start, const FVector& Dir
 	if (!bHit || !Hit.bBlockingHit) return;
 	
 	SpawnHitFX(Hit);
-	ApplyPhysicsImpulse(Hit, Direction);
 	
 	AActor* HitActor = Hit.GetActor();
 	if (!HitActor) return;
@@ -72,11 +71,3 @@ void URaycastShootingMethod::SpawnHitFX(const FHitResult& Hit) const
 		Weapon->GetWorld(), HitParticles, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 }
 
-void URaycastShootingMethod::ApplyPhysicsImpulse(const FHitResult& Hit, const FVector& Direction) const
-{
-	if (UPrimitiveComponent* Comp = Hit.GetComponent())
-	{
-		if (Comp->IsSimulatingPhysics())
-			Comp->AddImpulseAtLocation(Direction * 300000.f, Hit.ImpactPoint);
-	}
-}
